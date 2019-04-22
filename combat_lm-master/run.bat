@@ -1,0 +1,2 @@
+bldall combat
+exit
