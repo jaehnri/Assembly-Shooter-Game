@@ -110,6 +110,16 @@ updateScreen proc
     invoke CreateCompatibleDC, hDC
     mov hMemDC, eax
 
+    ;invoke wsprintf, ADDR buffer, ADDR test_header_format, h_V1_top_left
+    ;invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL
+
+    invoke SelectObject, hMemDC, h_V1_top_left
+
+    ;invoke TransparentBlt, hDC, 0, 0,\
+    ;    50, 50, hMemDC,\    
+    ;    0, 0, 50, 50, 16777215
+    invoke BitBlt, hDC, 0, 0, 50, 50, hMemDC, 0, 0, SRCCOPY 
+
     invoke DeleteDC, hMemDC
     invoke EndPaint, hWnd, ADDR paintstruct
 
@@ -136,7 +146,7 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
     mov   wc.cbWndExtra,NULL 
     push  hInstance 
     pop   wc.hInstance 
-    mov   wc.hbrBackground, COLOR_WINDOW + 3 ; deixa a tela preta
+    mov   wc.hbrBackground, COLOR_WINDOW + 3 ; black window
     mov   wc.lpszMenuName,NULL 
     mov   wc.lpszClassName ,OFFSET ClassName 
     invoke LoadIcon, NULL, IDI_APPLICATION 

@@ -6,6 +6,25 @@ includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\user32.lib
 includelib C:\masm32\lib\gdi32.lib
 
+;include C:\masm32\include\windows.inc
+;include C:\masm32\include\masm32.inc
+;include C:\masm32\include\gdi32.inc
+;include C:\masm32\include\user32.inc
+;include C:\masm32\include\kernel32.inc
+;include C:\masm32\include\Comctl32.inc
+;include C:\masm32\include\comdlg32.inc
+;include C:\masm32\include\shell32.inc
+;include C:\masm32\include\msimg32.inc
+
+;includelib C:\masm32\lib\masm32.lib
+;includelib C:\masm32\lib\gdi32.lib
+;includelib C:\masm32\lib\user32.lib
+;includelib C:\masm32\lib\kernel32.lib
+;includelib C:\masm32\lib\Comctl32.lib
+;includelib C:\masm32\lib\comdlg32.lib
+;includelib C:\masm32\lib\shell32.lib
+;includelib C:\masm32\lib\msimg32.lib
+
 point struct 
     x DWORD 0
     y DWORD 0
@@ -55,6 +74,10 @@ player ends
     h_V2_down           dd 0
     h_V2_down_left      dd 0
     h_V2_left           dd 0
+
+    test_header_format  db  "%d",0
+    buffer              db 256 dup(?)
+    msgBoxTitle         db "Testing",0
 
 .DATA?
     hWnd HWND ?
