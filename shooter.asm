@@ -259,26 +259,65 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
 WinMain endp
 
 WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM 
+
     .IF uMsg == WM_CREATE
         invoke loadImages
+    ;____________________________________________________________________________
 
     .ELSEIF uMsg == WM_DESTROY                                        ; if the user closes our window 
         invoke PostQuitMessage,NULL                                   ; quit our application 
     
     .ELSEIF uMsg == WM_PAINT
         invoke updateScreen
-
+    ;_____________________________________________________________________________
     .ELSEIF uMsg == WM_CHAR
-      ;  invoke 
+        ;mov eax, offset gameManager
+        ;invoke CreateThread, NULL, NULL, eax, 0, 0, addr threadID 
+        ;invoke CloseHandle, eax
 
+    .ELSEIF uMsg == WM_KEYDOWN    
+
+    ;___________________PLAYER 1 MOVEMENT KEYS____________________________________
+        .if (wParam == 57h)
+            mov eax, player1.playerObj.pos.y
+            sub eax, player1.playerObj.speed.y
+            mov player1.playerObj.pos.y, eax
+            invoke InvalidateRect, _hWnd, NULL, TRUE
+
+        .elseif (wParam == 53h) ;seta baixo
+            mov eax, player1.playerObj.pos.y
+            add eax, player1.playerObj.speed.y
+            mov player1.playerObj.pos.y, eax
+            invoke InvalidateRect, _hWnd, NULL, TRUE
+
+        .elseif (wParam == 41h) ;seta esquerda
+            mov eax, player1.playerObj.pos.x
+            sub eax, player1.playerObj.speed.x
+            mov player1.playerObj.pos.x, eax
+            invoke InvalidateRect, _hWnd, NULL, TRUE
+
+        .elseif (wParam == 44h) ;seta direita
+            mov eax, player1.playerObj.pos.x
+            add eax, player1.playerObj.speed.x
+            mov player1.playerObj.pos.x, eax
+            invoke InvalidateRect, _hWnd, NULL, TRUE
+        .endif
+    
     .ELSE   
+
         invoke DefWindowProc,_hWnd,uMsg,wParam,lParam                  ; Default message processing 
         ret 
+
     .ENDIF
+
     xor eax,eax 
     ret 
 WndProc endp
 
+aaaa proc
+
+ret
+aaaa endp
 ;_ END PROCEDURES ______________________________________________________________________
 
 end start
