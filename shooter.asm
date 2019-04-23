@@ -39,7 +39,7 @@ start:
     invoke ExitProcess, eax                                           ; quit our program. The exit code is returned in eax from WinMain.
 
 
-; _ PROCEDIMENTOS ___________________________________________________________________________
+; _ PROCEDURES ___________________________________________________________________________
 
 loadImages proc                                                 
     ; Loading Player 1's Bitmaps:
@@ -100,21 +100,21 @@ loadImages endp
 
 ;printPlayer proc
 
-;updateScreen proc
-;    LOCAL ps:PAINTSTRUCT
-;    LOCAL hMemDC:HDC 
-;    LOCAL hdc:HDC
+updateScreen proc
+    LOCAL paintstruct:PAINTSTRUCT
+    LOCAL hMemDC:HDC 
+    LOCAL hDC:HDC
 
-;    invoke BeginPaint, hWnd, addr ps
-;    mov hdc, eax 
-;
- ;   invoke CreateCompatibleDC, hdc 
-  ;  mov hMemDC, eax 
-;
-;
-;
- ;   ret
-;updateScreen endp
+    invoke BeginPaint, hWnd, ADDR paintstruct
+    mov hDC, eax
+    invoke CreateCompatibleDC, hDC
+    mov hMemDC, eax
+
+    invoke DeleteDC, hMemDC
+    invoke EndPaint, hWnd, ADDR paintstruct
+
+    ret
+updateScreen endp
 
 
 
@@ -172,14 +172,14 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
 WinMain endp
 
 WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM 
-    .IF uMsg==WM_CREATE
+    .IF uMsg == WM_CREATE
         invoke loadImages
 
-    .ELSEIF uMsg==WM_DESTROY                                          ; if the user closes our window 
+    .ELSEIF uMsg == WM_DESTROY                                        ; if the user closes our window 
         invoke PostQuitMessage,NULL                                   ; quit our application 
     
-    .ELSEIF uMsg==WM_PAINT
-        ;invoke updateScreen
+    .ELSEIF uMsg == WM_PAINT
+        invoke updateScreen
 
     .ELSE   
         invoke DefWindowProc,_hWnd,uMsg,wParam,lParam                  ; Default message processing 
@@ -189,6 +189,6 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     ret 
 WndProc endp
 
-;_ FIM PROCEDIMENTOS ______________________________________________________________________
+;_ END PROCEDURES ______________________________________________________________________
 
 end start
