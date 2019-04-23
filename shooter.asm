@@ -66,39 +66,116 @@ loadImages proc
     mov h_V1_down_left, eax
 
     invoke LoadBitmap, hInstance, 107       
-    mov h_V1_right, eax
+    mov h_V1_left, eax
 
 
     ;Loading Player 2's Bitmaps:
 
-    invoke LoadBitmap, hInstance, 108       
-    mov h_V2_top_left, eax
+    ;invoke LoadBitmap, hInstance, 108       
+    ;mov h_V2_top_left, eax
 
-    invoke LoadBitmap, hInstance, 109       
-    mov h_V2_top, eax
+    ;invoke LoadBitmap, hInstance, 109       
+    ;mov h_V2_top, eax
 
-    invoke LoadBitmap, hInstance, 110       
-    mov h_V2_top_right, eax
+    ;invoke LoadBitmap, hInstance, 110       
+    ;mov h_V2_top_right, eax
 
-    invoke LoadBitmap, hInstance, 111       
-    mov h_V2_right, eax
+    ;invoke LoadBitmap, hInstance, 111       
+    ;mov h_V2_right, eax
 
-    invoke LoadBitmap, hInstance, 112       
-    mov h_V2_down_right, eax
+    ;invoke LoadBitmap, hInstance, 112       
+    ;mov h_V2_down_right, eax
 
-    invoke LoadBitmap, hInstance, 113       
-    mov h_V2_down, eax
+    ;invoke LoadBitmap, hInstance, 113       
+    ;mov h_V2_down, eax
 
-    invoke LoadBitmap, hInstance, 114       
-    mov h_V2_down_left, eax
+    ;invoke LoadBitmap, hInstance, 114       
+    ;mov h_V2_down_left, eax
 
-    invoke LoadBitmap, hInstance, 115       
-    mov h_V2_right, eax
+    ;invoke LoadBitmap, hInstance, 115       
+    ;mov h_V2_left, eax
 
     ret
 loadImages endp
 
 ;printPlayer proc
+
+paintPlayers proc _hdc:HDC, _hMemDC:HDC
+    ;PLAYER 1___________________________________________
+        .if player1.direction == D_TOP_LEFT
+            invoke SelectObject, _hMemDC, h_V1_top_left
+        
+        .elseif player1.direction == D_TOP
+            invoke SelectObject, _hMemDC, h_V1_top
+
+        .elseif player1.direction == D_TOP_RIGHT
+            invoke SelectObject, _hMemDC, h_V1_top_right 
+
+        .elseif player1.direction == D_RIGHT
+            invoke SelectObject, _hMemDC, h_V1_right 
+
+        .elseif player1.direction == D_DOWN_RIGHT
+            invoke SelectObject, _hMemDC, h_V1_down_right 
+
+        .elseif player1.direction == D_DOWN
+            invoke SelectObject, _hMemDC, h_V1_down 
+
+        .elseif player1.direction == D_DOWN_LEFT
+            invoke SelectObject, _hMemDC, h_V1_down_left 
+
+        .elseif player1.direction == D_LEFT ;left is the last possible direction
+            invoke SelectObject, _hMemDC, h_V1_left  
+        .endif  
+
+    ;________PLAYER 1 PAINTING________________________________________________________________________
+
+        mov eax, player1.playerObj.pos.x
+        mov ebx, player1.playerObj.pos.y
+        sub eax, PLAYER_HALF_SIZE
+        sub ebx, PLAYER_HALF_SIZE
+
+        invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, 0, 0, SRCCOPY 
+    ;________________________________________________________________________________
+
+
+    ;PLAYER 2___________________________________________
+        .if player2.direction == D_TOP_LEFT
+            invoke SelectObject, _hMemDC, h_V1_top_left
+        
+        .elseif player2.direction == D_TOP
+            invoke SelectObject, _hMemDC, h_V1_top
+
+        .elseif player2.direction == D_TOP_RIGHT
+            invoke SelectObject, _hMemDC, h_V1_top_right 
+
+        .elseif player2.direction == D_RIGHT
+            invoke SelectObject, _hMemDC, h_V1_right 
+
+        .elseif player2.direction == D_DOWN_RIGHT
+            invoke SelectObject, _hMemDC, h_V1_down_right 
+
+        .elseif player2.direction == D_DOWN
+            invoke SelectObject, _hMemDC, h_V1_down 
+
+        .elseif player2.direction == D_DOWN_LEFT
+            invoke SelectObject, _hMemDC, h_V1_down_left 
+
+        .else ;left is the last possible direction
+            invoke SelectObject, _hMemDC, h_V1_left  
+        .endif 
+
+    ;________PLAYER 2 PAINTING________________________________________________________________________
+
+        mov eax, player2.playerObj.pos.x
+        mov ebx, player2.playerObj.pos.y
+        sub eax, PLAYER_HALF_SIZE
+        sub ebx, PLAYER_HALF_SIZE
+
+        invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, 0, 0, SRCCOPY 
+    ;________________________________________________________________________________
+    
+    ret
+paintPlayers endp
 
 updateScreen proc
     LOCAL paintstruct:PAINTSTRUCT
@@ -113,20 +190,20 @@ updateScreen proc
     ;invoke wsprintf, ADDR buffer, ADDR test_header_format, h_V1_top_left
     ;invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL
 
-    invoke SelectObject, hMemDC, h_V1_top_left
+    ;invoke SelectObject, hMemDC, h_V1_top_left
 
     ;invoke TransparentBlt, hDC, 0, 0,\
     ;    50, 50, hMemDC,\    
     ;    0, 0, 50, 50, 16777215
-    invoke BitBlt, hDC, 0, 0, 50, 50, hMemDC, 0, 0, SRCCOPY 
+    ;invoke BitBlt, hDC, 0, 0, PLAYER_SIZE, PLAYER_SIZE, hMemDC, 0, 0, SRCCOPY 
+
+    invoke paintPlayers, hDC, hMemDC
 
     invoke DeleteDC, hMemDC
     invoke EndPaint, hWnd, ADDR paintstruct
 
     ret
 updateScreen endp
-
-
 
 
 ;PaintToScreen proc _hDC:DWORD, _hMemDC:DWORD
@@ -190,6 +267,9 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     
     .ELSEIF uMsg == WM_PAINT
         invoke updateScreen
+
+    .ELSEIF uMsg == WM_CHAR
+      ;  invoke 
 
     .ELSE   
         invoke DefWindowProc,_hWnd,uMsg,wParam,lParam                  ; Default message processing 

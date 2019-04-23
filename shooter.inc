@@ -38,7 +38,7 @@ gameObject ends
 player struct
     playerObj gameObject <>
 
-    life      BYTE 3
+    life      BYTE 2
     direction BYTE 0
 player ends
 
@@ -53,6 +53,8 @@ player ends
     D_DOWN_LEFT  EQU 6
     D_LEFT       EQU 7
 
+    PLAYER_SIZE  EQU 50
+    PLAYER_HALF_SIZE EQU PLAYER_SIZE / 2
 
 .DATA
     ;Player 1 Bitmaps:
@@ -79,5 +81,13 @@ player ends
     buffer              db 256 dup(?)
     msgBoxTitle         db "Testing",0
 
+
+    ; Players
+    player1 player <<<100,100>, <0,0>>, 2, D_LEFT>
+    player2 player <<<200,200>, <0,0>>, 2, D_DOWN_LEFT>
+
 .DATA?
     hWnd HWND ?
+
+
+    
