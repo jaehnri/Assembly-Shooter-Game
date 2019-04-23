@@ -81,13 +81,12 @@ player ends
     buffer              db 256 dup(?)
     msgBoxTitle         db "Testing",0
 
-
     ; Players
-    player1 player <<<100,100>, <0,0>>, 2, D_LEFT>
-    player2 player <<<200,200>, <0,0>>, 2, D_DOWN_LEFT>
+    player1 player <<<100,100>, <3,3>>, 2, D_LEFT>
+    player2 player <<<200,200>, <3,3>>, 2, D_DOWN_LEFT>
 
 .DATA?
     hWnd HWND ?
-
+    threadID DWORD ?
 
     
