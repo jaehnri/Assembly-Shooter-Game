@@ -91,6 +91,12 @@ player ends
     player1 player <<<100,100>, <0,0>>, 2, D_LEFT>
     player2 player <<<200,200>, <0,0>>, 2, D_DOWN_LEFT>
 
+    player1PodeDash BYTE 0
+    player2PodeDash BYTE 0
+    cooldownDashPlayer1   BYTE 0
+    cooldownDashPlayer2   BYTE 0
+
+
 .DATA?
     hWnd HWND ?
     threadID DWORD ?

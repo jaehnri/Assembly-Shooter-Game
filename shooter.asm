@@ -12,7 +12,6 @@ WinMain proto :DWORD,:DWORD,:DWORD,:DWORD
 
 
 
-
 .DATA
 ClassName db "ShooterWindowClass",0        ; nome da classe de janela
 AppName db "ATARI SHOOTER",0         
@@ -128,7 +127,7 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
             invoke SelectObject, _hMemDC, h_V1_left  
         .endif  
 
-    ;________PLAYER 1 PAINTING________________________________________________________________________
+    ;________PLAYER 1 PAINTING_____________________________________________________________
 
         mov eax, player1.playerObj.pos.x
         mov ebx, player1.playerObj.pos.y
@@ -192,11 +191,9 @@ updateScreen proc
     ;invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL
 
     ;invoke SelectObject, hMemDC, h_V1_top_left
-
     ;invoke TransparentBlt, hDC, 0, 0,\
     ;    50, 50, hMemDC,\    
     ;    0, 0, 50, 50, 16777215
-    ;invoke BitBlt, hDC, 0, 0, PLAYER_SIZE, PLAYER_SIZE, hMemDC, 0, 0, SRCCOPY 
 
     invoke paintPlayers, hDC, hMemDC
 
@@ -277,10 +274,49 @@ updateDirection endp
 
 ;______________________________________________________________________________
 
+player1Dash proc
+    mov eax, player1.playerObj.pos.x
+    mov ebx, 20
+        .if player1.direction == D_TOP_LEFT
+            
+        .elseif player1.direction == D_TOP
+
+        .elseif player1.direction == D_TOP_RIGHT
+
+        .elseif player1.direction == D_RIGHT
+            mov eax, player1.playerObj.pos.x                    ; player pos
+            mov ebx, 20                             ; dash distance
+            add eax, ebx
+        .elseif player1.direction == D_DOWN_RIGHT
+
+        .elseif player1.direction == D_DOWN
+
+        .elseif player1.direction == D_DOWN_LEFT
+
+        .elseif player1.direction == D_LEFT ;left is the last possible direction
+
+        .endif  
+
+ret
+player1Dash endp
+
 
 gameManager proc p:dword
         .while !over
-            invoke  Sleep, 30
+            invoke Sleep, 30
+
+
+            .if cooldownDashPlayer2 != 50
+                inc cooldownDashPlayer2
+            .else
+                mov player2PodeDash, 1
+            .endif
+
+            .if cooldownDashPlayer1 != 50
+                inc cooldownDashPlayer1
+            .else
+                mov player1PodeDash, 1
+            .endif
 
             invoke movePlayer, addr player1.playerObj
             invoke movePlayer, addr player2.playerObj
@@ -421,6 +457,10 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             mov player1.playerObj.speed.x, -PLAYER_SPEED
         .elseif (wParam == 44h) ; d
             mov player1.playerObj.speed.x, PLAYER_SPEED
+        .elseif (wParam == 46h) ; f
+            .if player1PodeDash == 1
+                invoke player1Dash
+            .endif
 
         .elseif (wParam == VK_UP) ;up arrow
             mov player2.playerObj.speed.y, -PLAYER_SPEED
