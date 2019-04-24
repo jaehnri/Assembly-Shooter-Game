@@ -28,8 +28,8 @@ includelib \masm32\lib\gdi32.lib
 ;includelib C:\masm32\lib\msimg32.lib
 
 point struct 
-    x DWORD 0
-    y DWORD 0
+    x dd 0      
+    y dd 0
 point ends
 
 gameObject struct
@@ -58,6 +58,8 @@ player ends
     PLAYER_SIZE  EQU 50
     PLAYER_HALF_SIZE EQU PLAYER_SIZE / 2
 
+    PLAYER_SPEED EQU 6
+
 .DATA
     ;Player 1 Bitmaps:
     h_V1_top_left       dd 0
@@ -83,9 +85,11 @@ player ends
     buffer              db 256 dup(?)
     msgBoxTitle         db "Testing",0
 
+    over byte 0                                ; control game state (occuring or terminated)
+
     ; Players
-    player1 player <<<100,100>, <3,3>>, 2, D_LEFT>
-    player2 player <<<200,200>, <3,3>>, 2, D_DOWN_LEFT>
+    player1 player <<<100,100>, <0,0>>, 2, D_LEFT>
+    player2 player <<<200,200>, <0,0>>, 2, D_DOWN_LEFT>
 
 .DATA?
     hWnd HWND ?

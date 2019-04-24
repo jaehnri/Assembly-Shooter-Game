@@ -17,7 +17,6 @@ WinMain proto :DWORD,:DWORD,:DWORD,:DWORD
 ClassName db "ShooterWindowClass",0        ; nome da classe de janela
 AppName db "ATARI SHOOTER",0         
 
-over byte 0                                ; control game state (occuring or terminated)
 
 
 
@@ -73,29 +72,29 @@ loadImages proc
 
     ;Loading Player 2's Bitmaps:
 
-    ;invoke LoadBitmap, hInstance, 108       
-    ;mov h_V2_top_left, eax
+    invoke LoadBitmap, hInstance, 108       
+    mov h_V2_top_left, eax
 
-    ;invoke LoadBitmap, hInstance, 109       
-    ;mov h_V2_top, eax
+    invoke LoadBitmap, hInstance, 109       
+    mov h_V2_top, eax
 
-    ;invoke LoadBitmap, hInstance, 110       
-    ;mov h_V2_top_right, eax
+    invoke LoadBitmap, hInstance, 110       
+    mov h_V2_top_right, eax
 
-    ;invoke LoadBitmap, hInstance, 111       
-    ;mov h_V2_right, eax
+    invoke LoadBitmap, hInstance, 111       
+    mov h_V2_right, eax
 
-    ;invoke LoadBitmap, hInstance, 112       
-    ;mov h_V2_down_right, eax
+    invoke LoadBitmap, hInstance, 112       
+    mov h_V2_down_right, eax
 
-    ;invoke LoadBitmap, hInstance, 113       
-    ;mov h_V2_down, eax
+    invoke LoadBitmap, hInstance, 113       
+    mov h_V2_down, eax
 
-    ;invoke LoadBitmap, hInstance, 114       
-    ;mov h_V2_down_left, eax
+    invoke LoadBitmap, hInstance, 114       
+    mov h_V2_down_left, eax
 
-    ;invoke LoadBitmap, hInstance, 115       
-    ;mov h_V2_left, eax
+    invoke LoadBitmap, hInstance, 115       
+    mov h_V2_left, eax
 
     ret
 loadImages endp
@@ -137,33 +136,33 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
         sub ebx, PLAYER_HALF_SIZE
 
         invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, 0, 0, SRCCOPY 
-    ;________________________________________________________________________________
+    ;_______________________________________________________________________________________
 
 
     ;PLAYER 2___________________________________________
         .if player2.direction == D_TOP_LEFT
-            invoke SelectObject, _hMemDC, h_V1_top_left
+            invoke SelectObject, _hMemDC, h_V2_top_left
         
         .elseif player2.direction == D_TOP
-            invoke SelectObject, _hMemDC, h_V1_top
+            invoke SelectObject, _hMemDC, h_V2_top
 
         .elseif player2.direction == D_TOP_RIGHT
-            invoke SelectObject, _hMemDC, h_V1_top_right 
+            invoke SelectObject, _hMemDC, h_V2_top_right 
 
         .elseif player2.direction == D_RIGHT
-            invoke SelectObject, _hMemDC, h_V1_right 
+            invoke SelectObject, _hMemDC, h_V2_right 
 
         .elseif player2.direction == D_DOWN_RIGHT
-            invoke SelectObject, _hMemDC, h_V1_down_right 
+            invoke SelectObject, _hMemDC, h_V2_down_right 
 
         .elseif player2.direction == D_DOWN
-            invoke SelectObject, _hMemDC, h_V1_down 
+            invoke SelectObject, _hMemDC, h_V2_down 
 
         .elseif player2.direction == D_DOWN_LEFT
-            invoke SelectObject, _hMemDC, h_V1_down_left 
+            invoke SelectObject, _hMemDC, h_V2_down_left 
 
         .else ;left is the last possible direction
-            invoke SelectObject, _hMemDC, h_V1_left  
+            invoke SelectObject, _hMemDC, h_V2_left  
         .endif 
 
     ;________PLAYER 2 PAINTING________________________________________________________________________
@@ -206,29 +205,29 @@ updateScreen proc
 
     ret
 updateScreen endp
-
 ;______________________________________________________________________________
 
-gameManager proc p:dword
-
-        .while !over
-            invoke  Sleep, 60
-
-            ;movePlayer
-            ;updateDirection
-            ;invalidateRect
-        .endw
-    ret
-gameManager endp
-
-;______________________________________________________________________________
-
-movePlayer proc uses eax addrPlayer:dword
+movePlayer proc uses eax addrPlayer:dword               ; updates a gameObject position based on its speed
     assume ecx:ptr gameObject
     mov ecx, addrPlayer
 
+    ; X AXIS ______________
+    mov eax, [ecx].pos.x
+    mov ebx, [ecx].speed.x
+    .if bx > 7fh
+        or bx, 65280    ; if negative
+    .endif
+    add eax, ebx
+    mov [ecx].pos.x, eax
 
-
+    ; Y AXIS ______________
+    mov eax, [ecx].pos.y
+    mov ebx, [ecx].speed.y
+    .if bx > 7fh 
+        or bx, 65280    ; if negative
+    .endif
+    add ax, bx
+    mov [ecx].pos.y, eax
 
     assume ecx:nothing
     ret
@@ -236,10 +235,65 @@ movePlayer endp
 
 ;______________________________________________________________________________
 
-updateDirection proc addrPlayer:dword
 
+updateDirection proc addrPlayer:dword     ; updates direction based on players axis's speed
+assume eax:ptr player
+    mov eax, addrPlayer
+
+    mov ebx, [eax].playerObj.speed.x      ; player's x axis 
+    mov edx, [eax].playerObj.speed.y      ; player's y axis
+
+    .if ebx != 0 || edx != 0
+        .if ebx == 0                                 ; if x axis = 0 then:
+            .if edx > 7fh                                  ; if y axis < 0
+                mov [eax].direction, D_TOP       
+            .else                                          ;    y axis > 0
+                mov [eax].direction, D_DOWN     
+            .endif 
+
+
+        .elseif ebx > 7fh                             ; if x axis > 0
+            .if edx == 0                                    ; if y axis = 0
+                mov [eax].direction, D_LEFT  
+            .elseif edx > 7fh                               ; if y axis > 0
+                mov [eax].direction, D_TOP_LEFT             
+            .else 
+                mov [eax].direction, D_DOWN_LEFT            ; if y axis < 0
+            .endif    
+
+
+        .else                                          ; if x axis < 0
+            .if edx == 0                                    ; if y axis = 0
+                mov [eax].direction, D_RIGHT  
+            .elseif edx > 7fh                               ; if y axis > 0
+                mov [eax].direction, D_TOP_RIGHT   
+            .else                                           ;    y axis < 0
+                mov [eax].direction, D_DOWN_RIGHT  
+            .endif 
+        .endif
+    .endif
     ret
 updateDirection endp
+
+;______________________________________________________________________________
+
+
+gameManager proc p:dword
+        .while !over
+            invoke  Sleep, 30
+
+            invoke movePlayer, addr player1.playerObj
+            invoke movePlayer, addr player2.playerObj
+            
+            invoke updateDirection, addr player1.playerObj
+            invoke updateDirection, addr player2.playerObj
+
+            invoke InvalidateRect, hWnd, NULL, TRUE
+        .endw
+    ret
+gameManager endp
+
+
 
 ;_____________________________________________________________________________________________________________________________
 ;_____________________________________________________________________________________________________________________________
@@ -359,29 +413,23 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     .ELSEIF uMsg == WM_KEYDOWN    
 
     ;___________________PLAYER 1 MOVEMENT KEYS____________________________________
-        .if (wParam == 57h)
-            mov eax, player1.playerObj.pos.y
-            sub eax, player1.playerObj.speed.y
-            mov player1.playerObj.pos.y, eax
-            invoke InvalidateRect, _hWnd, NULL, TRUE
+        .if (wParam == 57h) ; w
+            mov player1.playerObj.speed.y, -PLAYER_SPEED
+        .elseif (wParam == 53h) ; s
+            mov player1.playerObj.speed.y, PLAYER_SPEED
+        .elseif (wParam == 41h) ; a
+            mov player1.playerObj.speed.x, -PLAYER_SPEED
+        .elseif (wParam == 44h) ; d
+            mov player1.playerObj.speed.x, PLAYER_SPEED
 
-        .elseif (wParam == 53h) ;seta baixo
-            mov eax, player1.playerObj.pos.y
-            add eax, player1.playerObj.speed.y
-            mov player1.playerObj.pos.y, eax
-            invoke InvalidateRect, _hWnd, NULL, TRUE
-
-        .elseif (wParam == 41h) ;seta esquerda
-            mov eax, player1.playerObj.pos.x
-            sub eax, player1.playerObj.speed.x
-            mov player1.playerObj.pos.x, eax
-            invoke InvalidateRect, _hWnd, NULL, TRUE
-
-        .elseif (wParam == 44h) ;seta direita
-            mov eax, player1.playerObj.pos.x
-            add eax, player1.playerObj.speed.x
-            mov player1.playerObj.pos.x, eax
-            invoke InvalidateRect, _hWnd, NULL, TRUE
+        .elseif (wParam == VK_UP) ;up arrow
+            mov player2.playerObj.speed.y, -PLAYER_SPEED
+        .elseif (wParam == VK_DOWN) ;down arrow 
+            mov player2.playerObj.speed.y, PLAYER_SPEED
+        .elseif (wParam == VK_LEFT) ;left arrow
+            mov player2.playerObj.speed.x, -PLAYER_SPEED
+        .elseif (wParam == VK_RIGHT) ;right arrow
+             mov player2.playerObj.speed.x, PLAYER_SPEED
         .endif
     
     .ELSE   
