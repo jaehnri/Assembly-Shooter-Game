@@ -15,7 +15,9 @@ WinMain proto :DWORD,:DWORD,:DWORD,:DWORD
 
 .DATA
 ClassName db "ShooterWindowClass",0        ; nome da classe de janela
-AppName db "ATARI SHOOTER",0              
+AppName db "ATARI SHOOTER",0         
+
+over byte 0                                ; control game state (occuring or terminated)
 
 
 
@@ -205,13 +207,45 @@ updateScreen proc
     ret
 updateScreen endp
 
+;______________________________________________________________________________
 
-;PaintToScreen proc _hDC:DWORD, _hMemDC:DWORD
-;    invoke SelectObject, _hMemDC, hTankPosition1 
+gameManager proc p:dword
+
+        .while !over
+            invoke  Sleep, 60
+
+            ;movePlayer
+            ;updateDirection
+            ;invalidateRect
+        .endw
+    ret
+gameManager endp
+
+;______________________________________________________________________________
+
+movePlayer proc uses eax addrPlayer:dword
+    assume ecx:ptr gameObject
+    mov ecx, addrPlayer
 
 
 
-; _ WINMAIN __________________________________________________________________________________
+
+    assume ecx:nothing
+    ret
+movePlayer endp
+
+;______________________________________________________________________________
+
+updateDirection proc addrPlayer:dword
+
+    ret
+updateDirection endp
+
+;_____________________________________________________________________________________________________________________________
+;_____________________________________________________________________________________________________________________________
+;_____________________________________________________________________________________________________________________________
+
+; _ WINMAIN __________________________________________________________________________________________________________________
 WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD 
     LOCAL wc:WNDCLASSEX                                               ; create local variables on stack 
     LOCAL msg:MSG 
@@ -262,6 +296,10 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
     .IF uMsg == WM_CREATE
         invoke loadImages
+
+        mov eax, offset gameManager 
+        invoke CreateThread, NULL, NULL, eax, 0, 0, addr threadID 
+        invoke CloseHandle, eax 
     ;____________________________________________________________________________
 
     .ELSEIF uMsg == WM_DESTROY                                        ; if the user closes our window 
@@ -274,6 +312,49 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         ;mov eax, offset gameManager
         ;invoke CreateThread, NULL, NULL, eax, 0, 0, addr threadID 
         ;invoke CloseHandle, eax
+
+    .ELSEIF uMsg == WM_KEYUP
+    ; PLAYER 1 ____________________________________________________________________
+        .if (wParam == 77h || wParam == 57h) ;w
+            .if (player1.playerObj.speed.y > 7fh) 
+                mov player1.playerObj.speed.y, 0 
+            .endif
+        .elseif (wParam == 61h || wParam == 41h) ;a
+            .if (player1.playerObj.speed.x > 7fh) 
+                mov player1.playerObj.speed.x, 0 
+            .endif
+        .elseif (wParam == 73h || wParam == 53h) ;s
+            .if (player1.playerObj.speed.y < 80h) 
+                mov player1.playerObj.speed.y, 0 
+            .endif
+        .elseif (wParam == 64h || wParam == 44h) ;d
+            .if (player1.playerObj.speed.x < 80h) 
+                mov player1.playerObj.speed.x, 0 
+            .endif
+;________________________________________________________________________________
+;________________________________________________________________________________
+        
+    ; PLAYER 2 __________________________________________________________________
+        .elseif (wParam == VK_UP) ;up arrow
+            .if (player2.playerObj.speed.y > 7fh) 
+                mov player2.playerObj.speed.y, 0 
+            .endif
+        .elseif (wParam == VK_DOWN) ;down arrow
+            .if (player2.playerObj.speed.y < 80h) 
+                mov player2.playerObj.speed.y, 0 
+            .endif
+        .elseif (wParam == VK_LEFT) ;left arrow
+            .if (player2.playerObj.speed.x > 7fh) 
+                mov player2.playerObj.speed.x, 0 
+            .endif
+        .elseif (wParam == VK_RIGHT) ;right arrow
+            .if (player2.playerObj.speed.x < 80h)
+                mov player2.playerObj.speed.x, 0 
+            .endif
+        .endif
+
+;________________________________________________________________________________
+;________________________________________________________________________________
 
     .ELSEIF uMsg == WM_KEYDOWN    
 
