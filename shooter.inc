@@ -39,7 +39,7 @@ gameObject ends
 
 player struct
     playerObj gameObject <>
-    
+
     cooldownDash BYTE 0
     life         BYTE 2
     direction    BYTE 0
@@ -47,6 +47,11 @@ player ends
 
 
 .CONST
+
+    WIN_HT equ 700 ;Altura da janela
+    WIN_WD equ 1200 ;Largura da janela
+
+
     D_TOP_LEFT    EQU 0
     D_TOP         EQU 1
     D_TOP_RIGHT   EQU 2

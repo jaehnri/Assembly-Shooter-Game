@@ -315,6 +315,30 @@ updateDirection endp
 
 ;______________________________________________________________________________
 
+fixCoordinates proc addrPlayer:dword
+assume eax:ptr player
+    mov eax, addrPlayer
+
+    .if [eax].playerObj.pos.x > 1230
+        mov [eax].playerObj.pos.x, 20
+    .endif
+
+    .if [eax].playerObj.pos.x <= 10
+        mov [eax].playerObj.pos.x, 1200 
+    .endif
+
+
+    .if [eax].playerObj.pos.y > 700
+        mov [eax].playerObj.pos.y, 20
+    .endif
+
+    .if [eax].playerObj.pos.y <= 10
+        mov [eax].playerObj.pos.y, 695 
+    .endif
+ret
+fixCoordinates endp
+;______________________________________________________________________________
+
 
 gameManager proc p:dword
         .while !over
@@ -349,6 +373,9 @@ gameManager proc p:dword
             
             invoke updateDirection, addr player1.playerObj
             invoke updateDirection, addr player2.playerObj
+
+            invoke fixCoordinates, addr player1
+            invoke fixCoordinates, addr player2
 
             invoke InvalidateRect, hWnd, NULL, TRUE
         .endw
@@ -514,10 +541,6 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     ret 
 WndProc endp
 
-aaaa proc
-
-ret
-aaaa endp
 ;_ END PROCEDURES ______________________________________________________________________
 
 end start
