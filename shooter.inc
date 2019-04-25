@@ -45,11 +45,19 @@ player struct
     direction    BYTE 0
 player ends
 
+arrow struct
+    arrowObj          gameObject <>
+
+    remainingDistance DWORD 0    ; DISTANCE REMAINING TIL IT STOPS
+    playerOwns        BYTE  1
+    stopped           BYTE  0
+    owner             BYTE  0    ; IF 1 -> PLAYER1 
+    direction         BYTE  0    ; IF 2 -> PLAYER2 
+arrow ends                                                      
+                      
+
 
 .CONST
-
-    WIN_HT equ 700 ;Altura da janela
-    WIN_WD equ 1200 ;Largura da janela
 
 
     D_TOP_LEFT    EQU 0
@@ -61,10 +69,13 @@ player ends
     D_DOWN_LEFT   EQU 6
     D_LEFT        EQU 7
 
-    PLAYER_SIZE   EQU 50
+    PLAYER_SIZE      EQU 50
     PLAYER_HALF_SIZE EQU PLAYER_SIZE / 2
+    ARROW_SIZE       EQU 46
+    ARROW_HALF_SIZE  EQU ARROW_SIZE / 2
 
     PLAYER_SPEED  EQU 6
+    ARROW_SPEED   EQU 50
 
     DASH_DISTANCE EQU 100
 
@@ -89,7 +100,10 @@ player ends
     h_V2_down_left      dd 0
     h_V2_left           dd 0
 
-    test_header_format  db  "%d",0
+    ;Arrow 1 Bitmaps:
+    h_A1_left           dd 0
+
+    test_header_format  db  "A: %d",0
     buffer              db 256 dup(?)
     msgBoxTitle         db "Testing",0
 
@@ -99,12 +113,17 @@ player ends
     player1 player <<<100,350>,  <0,0>>, 0, 2, D_RIGHT>  ; dash initialized as 8 because 0 to 7 are directions, so 8 is the same as null 
     player2 player <<<1120,350>, <0,0>>, 0, 2, D_LEFT>
 
+    arrow1 arrow <<<50, 50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 1, 1>  
+    arrow2 arrow <<<50, 50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 1, 2>
+
     player1CanDash        BYTE 0
     player2CanDash        BYTE 0
 
     player1DashClick      BYTE 0
     player2DashClick      BYTE 0
 
+    arrow1Shot            BYTE 0
+    arrow2Shot            BYTE 0 
 
 .DATA?
     hWnd HWND ?

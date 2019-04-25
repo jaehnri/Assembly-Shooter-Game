@@ -95,6 +95,11 @@ loadImages proc
     invoke LoadBitmap, hInstance, 115       
     mov h_V2_left, eax
 
+    ;Loading Arrow 1's Bitmaps:
+
+    invoke LoadBitmap, hInstance, 116
+    mov h_A1_left, eax
+
     ret
 loadImages endp
 
@@ -177,6 +182,51 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
     ret
 paintPlayers endp
 
+;________________________________________________________________________________
+
+paintArrows proc _hdc:HDC, _hMemDC:HDC
+    ;ARROW 1___________________________________________
+    ;    .if player1.direction == D_TOP_LEFT
+    ;        invoke SelectObject, _hMemDC, h_V1_top_left
+    ;    
+    ;    .elseif player1.direction == D_TOP
+    ;        invoke SelectObject, _hMemDC, h_V1_top
+;
+ ;       .elseif player1.direction == D_TOP_RIGHT
+  ;          invoke SelectObject, _hMemDC, h_V1_top_right 
+;
+ ;       .elseif player1.direction == D_RIGHT
+  ;          invoke SelectObject, _hMemDC, h_V1_right 
+;
+ ;       .elseif player1.direction == D_DOWN_RIGHT
+  ;          invoke SelectObject, _hMemDC, h_V1_down_right 
+;
+ ;       .elseif player1.direction == D_DOWN
+  ;          invoke SelectObject, _hMemDC, h_V1_down 
+;
+ ;       .elseif player1.direction == D_DOWN_LEFT
+  ;          invoke SelectObject, _hMemDC, h_V1_down_left 
+;
+ ;       .elseif player1.direction == D_LEFT ;left is the last possible direction
+  ;          invoke SelectObject, _hMemDC, h_V1_left  
+   ;     .endif  
+
+    ;________PLAYER 1 PAINTING_____________________________________________________________
+
+        invoke SelectObject, _hMemDC, h_A1_left
+
+        mov eax, arrow1.arrowObj.pos.x
+        mov ebx, arrow1.arrowObj.pos.y
+        sub eax, ARROW_HALF_SIZE
+        sub ebx, ARROW_HALF_SIZE
+
+        invoke BitBlt, _hdc, eax, ebx, ARROW_SIZE, ARROW_SIZE, _hMemDC, 0, 0, SRCCOPY 
+    
+    ret
+paintArrows endp
+
+;________________________________________________________________________________
+
 updateScreen proc
     LOCAL paintstruct:PAINTSTRUCT
     LOCAL hMemDC:HDC 
@@ -196,9 +246,11 @@ updateScreen proc
     ;    0, 0, 50, 50, 16777215
 
     invoke paintPlayers, hDC, hMemDC
+    invoke paintArrows, hDC, hMemDC
 
     invoke DeleteDC, hMemDC
     invoke EndPaint, hWnd, ADDR paintstruct
+
 
     ret
 updateScreen endp
@@ -315,30 +367,107 @@ updateDirection endp
 
 ;______________________________________________________________________________
 
+moveArrow proc uses eax addrArrow:dword               ; updates a gameObject position based on its speed
+    assume eax:ptr arrow
+    mov eax, addrArrow
+
+    mov ebx, [eax].arrowObj.speed.x
+    mov ecx, [eax].arrowObj.speed.y
+
+    .if [eax].remainingDistance > 0
+        .if [eax].direction == D_TOP_LEFT
+            add [eax].arrowObj.pos.x, -ARROW_SPEED
+            add [eax].arrowObj.pos.y, -ARROW_SPEED
+            sub [eax].remainingDistance, ARROW_SPEED
+
+        .elseif [eax].direction == D_TOP
+            add [eax].arrowObj.pos.y, -ARROW_SPEED
+            sub [eax].remainingDistance, ARROW_SPEED
+
+        .elseif [eax].direction == D_TOP_RIGHT
+            add [eax].arrowObj.pos.x,  ARROW_SPEED
+            add [eax].arrowObj.pos.y, -ARROW_SPEED
+            sub [eax].remainingDistance, ARROW_SPEED
+        
+        .elseif [eax].direction == D_RIGHT
+            add [eax].arrowObj.pos.x,  ARROW_SPEED
+            sub [eax].remainingDistance, ARROW_SPEED
+
+        .elseif [eax].direction == D_DOWN_RIGHT
+            add [eax].arrowObj.pos.x,  ARROW_SPEED
+            add [eax].arrowObj.pos.y,  ARROW_SPEED
+            sub [eax].remainingDistance, ARROW_SPEED
+
+        .elseif [eax].direction == D_DOWN
+            add [eax].arrowObj.pos.y,  ARROW_SPEED
+            sub [eax].remainingDistance, ARROW_SPEED
+
+        .elseif [eax].direction == D_DOWN_LEFT
+            add [eax].arrowObj.pos.x, -ARROW_SPEED
+            add [eax].arrowObj.pos.y,  ARROW_SPEED
+            sub [eax].remainingDistance, ARROW_SPEED
+
+        .elseif [eax].direction == D_LEFT
+            add [eax].arrowObj.pos.x,  -DASH_DISTANCE
+            sub [eax].remainingDistance, ARROW_SPEED
+        .endif
+    .else
+        mov [eax].stopped, 1 
+    .endif
+    assume eax:nothing
+    ret
+moveArrow endp
+;______________________________________________________________________________
+
 fixCoordinates proc addrPlayer:dword
 assume eax:ptr player
     mov eax, addrPlayer
 
-    .if [eax].playerObj.pos.x > 1230
-        mov [eax].playerObj.pos.x, 20
+    .if [eax].playerObj.pos.x > 1200                    ;should use constants but did this lazy af
+        mov [eax].playerObj.pos.x, 20                   ;sorry
     .endif
 
     .if [eax].playerObj.pos.x <= 10
-        mov [eax].playerObj.pos.x, 1200 
+        mov [eax].playerObj.pos.x, 1180 
     .endif
 
 
-    .if [eax].playerObj.pos.y > 700
+    .if [eax].playerObj.pos.y > 620
         mov [eax].playerObj.pos.y, 20
     .endif
 
     .if [eax].playerObj.pos.y <= 10
-        mov [eax].playerObj.pos.y, 695 
+        mov [eax].playerObj.pos.y, 610 
     .endif
 ret
 fixCoordinates endp
+
 ;______________________________________________________________________________
 
+fixArrowCoordinates proc addrArrow:dword
+assume eax:ptr arrow
+    mov eax, addrArrow
+
+    .if [eax].arrowObj.pos.x > 1200                    ;should use constants but did this lazy af
+        mov [eax].arrowObj.pos.x, 20                   ;sorry
+    .endif
+
+    .if [eax].arrowObj.pos.x <= 10
+        mov [eax].arrowObj.pos.x, 1180 
+    .endif
+
+
+    .if [eax].arrowObj.pos.y > 620
+        mov [eax].arrowObj.pos.y, 20
+    .endif
+
+    .if [eax].arrowObj.pos.y <= 10
+        mov [eax].arrowObj.pos.y, 610 
+    .endif
+ret
+fixArrowCoordinates endp
+
+;______________________________________________________________________________
 
 gameManager proc p:dword
         .while !over
@@ -368,11 +497,19 @@ gameManager proc p:dword
                 mov player1CanDash, 0
             .endif
 
+            .if arrow1.remainingDistance > 0
+                invoke moveArrow, addr arrow1
+            .endif
+
             invoke movePlayer, addr player1
             invoke movePlayer, addr player2
             
+            
             invoke updateDirection, addr player1.playerObj
             invoke updateDirection, addr player2.playerObj
+
+            invoke fixArrowCoordinates, addr arrow1
+            invoke fixArrowCoordinates, addr arrow2
 
             invoke fixCoordinates, addr player1
             invoke fixCoordinates, addr player2
@@ -515,6 +652,11 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             .if player1CanDash == 1
                 mov player1DashClick, 1                              ; means the player CAN and WANTS TO dash                
             .endif
+        .elseif (wParam == 47h) ; g
+            .if arrow1.playerOwns == 1
+                mov arrow1.remainingDistance, 800 
+                mov arrow1.playerOwns, 0
+            .endif
 
         .elseif (wParam == VK_UP) ;up arrow
             mov player2.playerObj.speed.y, -PLAYER_SPEED
@@ -524,11 +666,14 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             mov player2.playerObj.speed.x, -PLAYER_SPEED
         .elseif (wParam == VK_RIGHT) ;right arrow
              mov player2.playerObj.speed.x, PLAYER_SPEED
-        .elseif (wParam == 4Ch) ; l
+        .elseif (wParam == 16) ;      ;RSHIFT
             .if player2CanDash == 1
                 mov player2DashClick, 1                              ; means the player CAN and WANTS TO dash                
             .endif
         .endif 
+
+        ;invoke wsprintf, ADDR buffer, ADDR test_header_format, wParam
+        ;invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL 
     
     .ELSE   
 
