@@ -656,6 +656,15 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             .if arrow1.playerOwns == 1
                 mov arrow1.remainingDistance, 800 
                 mov arrow1.playerOwns, 0
+                
+                mov ah, player1.direction
+                mov arrow1.direction, ah
+                
+                mov eax, player1.playerObj.pos.x
+                mov arrow1.arrowObj.pos.x, eax
+
+                mov eax, player1.playerObj.pos.y
+                mov arrow1.arrowObj.pos.y, eax  
             .endif
 
         .elseif (wParam == VK_UP) ;up arrow
