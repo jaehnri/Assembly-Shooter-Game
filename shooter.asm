@@ -232,6 +232,47 @@ movePlayer endp
 
 ;______________________________________________________________________________
 
+dashPlayer proc addrPlayer:dword
+assume eax:ptr player
+    mov eax, addrPlayer
+    mov edx, DASH_DISTANCE
+
+    .if [eax].direction == D_TOP_LEFT
+        add [eax].playerObj.pos.x, -DASH_DISTANCE
+        add [eax].playerObj.pos.y, -DASH_DISTANCE
+    
+    .elseif [eax].direction == D_TOP
+        add [eax].playerObj.pos.y, -DASH_DISTANCE
+
+    .elseif [eax].direction == D_TOP_RIGHT
+        add [eax].playerObj.pos.x,  DASH_DISTANCE
+        add [eax].playerObj.pos.y, -DASH_DISTANCE
+    
+    .elseif [eax].direction == D_RIGHT
+        add [eax].playerObj.pos.x,  DASH_DISTANCE
+
+    .elseif [eax].direction == D_DOWN_RIGHT
+        add [eax].playerObj.pos.x,  DASH_DISTANCE
+        add [eax].playerObj.pos.y,  DASH_DISTANCE
+
+    .elseif [eax].direction == D_DOWN
+        add [eax].playerObj.pos.y,  DASH_DISTANCE
+
+    .elseif [eax].direction == D_DOWN_LEFT
+        add [eax].playerObj.pos.x, -DASH_DISTANCE
+        add [eax].playerObj.pos.y,  DASH_DISTANCE
+
+    .elseif [eax].direction == D_LEFT
+        add [eax].playerObj.pos.x,  -DASH_DISTANCE
+    .endif 
+
+    mov [eax].cooldownDash, 0
+
+    ret
+dashPlayer endp
+
+;______________________________________________________________________________
+
 
 updateDirection proc addrPlayer:dword     ; updates direction based on players axis's speed
 assume eax:ptr player
@@ -274,52 +315,37 @@ updateDirection endp
 
 ;______________________________________________________________________________
 
-player1Dash proc
-    mov eax, player1.playerObj.pos.x
-    mov ebx, 20
-        .if player1.direction == D_TOP_LEFT
-            
-        .elseif player1.direction == D_TOP
-
-        .elseif player1.direction == D_TOP_RIGHT
-
-        .elseif player1.direction == D_RIGHT
-            mov eax, player1.playerObj.pos.x                    ; player pos
-            mov ebx, 20                             ; dash distance
-            add eax, ebx
-        .elseif player1.direction == D_DOWN_RIGHT
-
-        .elseif player1.direction == D_DOWN
-
-        .elseif player1.direction == D_DOWN_LEFT
-
-        .elseif player1.direction == D_LEFT ;left is the last possible direction
-
-        .endif  
-
-ret
-player1Dash endp
-
 
 gameManager proc p:dword
         .while !over
             invoke Sleep, 30
 
 
-            .if cooldownDashPlayer2 != 50
-                inc cooldownDashPlayer2
+            .if player2.cooldownDash  != 10
+                inc player2.cooldownDash
             .else
-                mov player2PodeDash, 1
+                mov player2CanDash, 1
             .endif
 
-            .if cooldownDashPlayer1 != 50
-                inc cooldownDashPlayer1
+            .if player1.cooldownDash != 10
+                inc player1.cooldownDash
             .else
-                mov player1PodeDash, 1
+                mov player1CanDash, 1
             .endif
 
-            invoke movePlayer, addr player1.playerObj
-            invoke movePlayer, addr player2.playerObj
+            .if player2DashClick == 1
+                invoke dashPlayer, addr player2
+                mov player2DashClick, 0
+                mov player2CanDash, 0
+            .endif
+            .if player1DashClick == 1
+                invoke dashPlayer, addr player1
+                mov player1DashClick, 0
+                mov player1CanDash, 0
+            .endif
+
+            invoke movePlayer, addr player1
+            invoke movePlayer, addr player2
             
             invoke updateDirection, addr player1.playerObj
             invoke updateDirection, addr player2.playerObj
@@ -421,6 +447,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             .if (player1.playerObj.speed.x < 80h) 
                 mov player1.playerObj.speed.x, 0 
             .endif
+            
 ;________________________________________________________________________________
 ;________________________________________________________________________________
         
@@ -458,8 +485,8 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         .elseif (wParam == 44h) ; d
             mov player1.playerObj.speed.x, PLAYER_SPEED
         .elseif (wParam == 46h) ; f
-            .if player1PodeDash == 1
-                invoke player1Dash
+            .if player1CanDash == 1
+                mov player1DashClick, 1                              ; means the player CAN and WANTS TO dash                
             .endif
 
         .elseif (wParam == VK_UP) ;up arrow
@@ -470,7 +497,11 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             mov player2.playerObj.speed.x, -PLAYER_SPEED
         .elseif (wParam == VK_RIGHT) ;right arrow
              mov player2.playerObj.speed.x, PLAYER_SPEED
-        .endif
+        .elseif (wParam == 4Ch) ; l
+            .if player2CanDash == 1
+                mov player2DashClick, 1                              ; means the player CAN and WANTS TO dash                
+            .endif
+        .endif 
     
     .ELSE   
 

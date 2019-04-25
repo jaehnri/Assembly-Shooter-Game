@@ -39,26 +39,29 @@ gameObject ends
 
 player struct
     playerObj gameObject <>
-
-    life      BYTE 2
-    direction BYTE 0
+    
+    cooldownDash BYTE 0
+    life         BYTE 2
+    direction    BYTE 0
 player ends
 
 
 .CONST
-    D_TOP_LEFT   EQU 0
-    D_TOP        EQU 1
-    D_TOP_RIGHT  EQU 2
-    D_RIGHT      EQU 3
-    D_DOWN_RIGHT EQU 4
-    D_DOWN       EQU 5
-    D_DOWN_LEFT  EQU 6
-    D_LEFT       EQU 7
+    D_TOP_LEFT    EQU 0
+    D_TOP         EQU 1
+    D_TOP_RIGHT   EQU 2
+    D_RIGHT       EQU 3
+    D_DOWN_RIGHT  EQU 4
+    D_DOWN        EQU 5
+    D_DOWN_LEFT   EQU 6
+    D_LEFT        EQU 7
 
-    PLAYER_SIZE  EQU 50
+    PLAYER_SIZE   EQU 50
     PLAYER_HALF_SIZE EQU PLAYER_SIZE / 2
 
-    PLAYER_SPEED EQU 6
+    PLAYER_SPEED  EQU 6
+
+    DASH_DISTANCE EQU 100
 
 .DATA
     ;Player 1 Bitmaps:
@@ -88,13 +91,14 @@ player ends
     over byte 0                                ; control game state (occuring or terminated)
 
     ; Players
-    player1 player <<<100,100>, <0,0>>, 2, D_LEFT>
-    player2 player <<<200,200>, <0,0>>, 2, D_DOWN_LEFT>
+    player1 player <<<100,350>,  <0,0>>, 0, 2, D_RIGHT>  ; dash initialized as 8 because 0 to 7 are directions, so 8 is the same as null 
+    player2 player <<<1120,350>, <0,0>>, 0, 2, D_LEFT>
 
-    player1PodeDash BYTE 0
-    player2PodeDash BYTE 0
-    cooldownDashPlayer1   BYTE 0
-    cooldownDashPlayer2   BYTE 0
+    player1CanDash        BYTE 0
+    player2CanDash        BYTE 0
+
+    player1DashClick      BYTE 0
+    player2DashClick      BYTE 0
 
 
 .DATA?
