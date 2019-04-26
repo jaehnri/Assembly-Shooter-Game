@@ -58,7 +58,8 @@ arrow ends
 
 
 .CONST
-
+    WINDOW_SIZE_X EQU 1200
+    WINDOW_SIZE_Y EQU 700
 
     D_TOP_LEFT    EQU 0
     D_TOP         EQU 1

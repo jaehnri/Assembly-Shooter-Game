@@ -316,6 +316,7 @@ assume eax:ptr player
 
     .elseif [eax].direction == D_LEFT
         add [eax].playerObj.pos.x,  -DASH_DISTANCE
+
     .endif 
 
     mov [eax].cooldownDash, 0
@@ -423,21 +424,21 @@ fixCoordinates proc addrPlayer:dword
 assume eax:ptr player
     mov eax, addrPlayer
 
-    .if [eax].playerObj.pos.x > 1200                    ;should use constants but did this lazy af
+    .if [eax].playerObj.pos.x > WINDOW_SIZE_X                  
         mov [eax].playerObj.pos.x, 20                   ;sorry
     .endif
 
     .if [eax].playerObj.pos.x <= 10
-        mov [eax].playerObj.pos.x, 1180 
+        mov [eax].playerObj.pos.x, WINDOW_SIZE_X - 20 
     .endif
 
 
-    .if [eax].playerObj.pos.y > 620
+    .if [eax].playerObj.pos.y > WINDOW_SIZE_Y - 70
         mov [eax].playerObj.pos.y, 20
     .endif
 
     .if [eax].playerObj.pos.y <= 10
-        mov [eax].playerObj.pos.y, 610 
+        mov [eax].playerObj.pos.y, WINDOW_SIZE_Y - 80 
     .endif
 ret
 fixCoordinates endp
