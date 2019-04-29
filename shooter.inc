@@ -52,7 +52,7 @@ arrow struct
 
     remainingDistance DWORD 0    ; DISTANCE REMAINING TIL IT STOPS
     playerOwns        BYTE  1
-    stopped           BYTE  0
+    onGround          BYTE  0
     owner             BYTE  0    ; IF 1 -> PLAYER1 
     direction         BYTE  0    ; IF 2 -> PLAYER2 
 arrow ends                                                      
@@ -104,7 +104,8 @@ arrow ends
     h_V2_left           dd 0
 
     ;Arrow 1 Bitmaps:
-    h_A1_left           dd 0
+    A1_left             dd 0
+    A1_onGround         dd 0
 
     test_header_format  db  "A: %d",13,10,0
     buffer              db 256 dup(?)
@@ -116,8 +117,8 @@ arrow ends
     player1 player <<<100,350>,  <0,0>>, 0, 2, D_RIGHT>  ; dash initialized as 8 because 0 to 7 are directions, so 8 is the same as null 
     player2 player <<<1120,350>, <0,0>>, 0, 2, D_LEFT>
 
-    arrow1 arrow <<<50, 50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 1, 1, 8>  
-    arrow2 arrow <<<50, 50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 1, 2, 8>
+    arrow1 arrow <<<50, 50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 1, 8>  
+    arrow2 arrow <<<50, 50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 2, 8>
 
     player1CanDash        BYTE 0
     player2CanDash        BYTE 0

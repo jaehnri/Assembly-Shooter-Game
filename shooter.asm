@@ -98,7 +98,10 @@ loadImages proc
     ;Loading Arrow 1's Bitmaps:
 
     invoke LoadBitmap, hInstance, 116
-    mov h_A1_left, eax
+    mov A1_left, eax
+
+    invoke LoadBitmap, hInstance, 124
+    mov A1_onGround, eax
 
     ret
 loadImages endp
@@ -184,36 +187,15 @@ paintPlayers endp
 
 ;________________________________________________________________________________
 
-paintArrows proc _hdc:HDC, _hMemDC:HDC
-    ;ARROW 1___________________________________________
-    ;    .if player1.direction == D_TOP_LEFT
-    ;        invoke SelectObject, _hMemDC, h_V1_top_left
-    ;    
-    ;    .elseif player1.direction == D_TOP
-    ;        invoke SelectObject, _hMemDC, h_V1_top
-;
- ;       .elseif player1.direction == D_TOP_RIGHT
-  ;          invoke SelectObject, _hMemDC, h_V1_top_right 
-;
- ;       .elseif player1.direction == D_RIGHT
-  ;          invoke SelectObject, _hMemDC, h_V1_right 
-;
- ;       .elseif player1.direction == D_DOWN_RIGHT
-  ;          invoke SelectObject, _hMemDC, h_V1_down_right 
-;
- ;       .elseif player1.direction == D_DOWN
-  ;          invoke SelectObject, _hMemDC, h_V1_down 
-;
- ;       .elseif player1.direction == D_DOWN_LEFT
-  ;          invoke SelectObject, _hMemDC, h_V1_down_left 
-;
- ;       .elseif player1.direction == D_LEFT ;left is the last possible direction
-  ;          invoke SelectObject, _hMemDC, h_V1_left  
-   ;     .endif  
+paintArrows proc _hdc:HDC, _hMemDC:HDC 
 
     ;________PLAYER 1 PAINTING_____________________________________________________________
 
-        invoke SelectObject, _hMemDC, h_A1_left
+        .if arrow1.onGround == 1 
+            invoke SelectObject, _hMemDC, A1_onGround
+        .else
+            invoke SelectObject, _hMemDC, A1_left  
+        .endif
 
         mov eax, arrow1.arrowObj.pos.x
         mov ebx, arrow1.arrowObj.pos.y
@@ -375,6 +357,7 @@ moveArrow proc uses eax addrArrow:dword               ; updates a gameObject pos
     mov ebx, [eax].arrowObj.speed.x
     mov ecx, [eax].arrowObj.speed.y
 
+    mov [eax].onGround, 0
     .if [eax].remainingDistance > 0
         .if [eax].direction == D_TOP_LEFT
             add [eax].arrowObj.pos.x, -ARROW_SPEED
@@ -413,7 +396,7 @@ moveArrow proc uses eax addrArrow:dword               ; updates a gameObject pos
             sub [eax].remainingDistance, ARROW_SPEED
         .endif
     .else
-        mov [eax].stopped, 1 
+        mov [eax].onGround, 1 
     .endif
     assume eax:nothing
     ret
@@ -500,6 +483,8 @@ gameManager proc p:dword
 
             .if arrow1.remainingDistance > 0
                 invoke moveArrow, addr arrow1
+            .else
+                mov arrow1.onGround, 1
             .endif
 
             invoke movePlayer, addr player1
