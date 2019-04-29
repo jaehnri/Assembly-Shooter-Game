@@ -1,7 +1,9 @@
-include \masm32\include\windows.inc 
-include \masm32\include\user32.inc 
-include \masm32\include\kernel32.inc 
-include \masm32\include\gdi32.inc
+include c:\masm32\include\masm32rt.inc
+
+;include \masm32\include\windows.inc 
+;include \masm32\include\user32.inc 
+;include \masm32\include\kernel32.inc 
+;include \masm32\include\gdi32.inc
 ;include C:\masm32\include\gdi32.inc
 includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\user32.lib
@@ -104,7 +106,7 @@ arrow ends
     ;Arrow 1 Bitmaps:
     h_A1_left           dd 0
 
-    test_header_format  db  "A: %d",0
+    test_header_format  db  "A: %d",13,10,0
     buffer              db 256 dup(?)
     msgBoxTitle         db "Testing",0
 

@@ -409,7 +409,7 @@ moveArrow proc uses eax addrArrow:dword               ; updates a gameObject pos
             sub [eax].remainingDistance, ARROW_SPEED
 
         .elseif [eax].direction == D_LEFT
-            add [eax].arrowObj.pos.x,  -DASH_DISTANCE
+            add [eax].arrowObj.pos.x,  -ARROW_SPEED
             sub [eax].remainingDistance, ARROW_SPEED
         .endif
     .else
@@ -424,20 +424,20 @@ fixCoordinates proc addrPlayer:dword
 assume eax:ptr player
     mov eax, addrPlayer
 
-    .if [eax].playerObj.pos.x > WINDOW_SIZE_X                  
+    .if [eax].playerObj.pos.x > WINDOW_SIZE_X && [eax].playerObj.pos.x < 80000000h
         mov [eax].playerObj.pos.x, 20                   ;sorry
     .endif
 
-    .if [eax].playerObj.pos.x <= 10
+    .if [eax].playerObj.pos.x <= 10 || [eax].playerObj.pos.x > 80000000h
         mov [eax].playerObj.pos.x, WINDOW_SIZE_X - 20 
     .endif
 
 
-    .if [eax].playerObj.pos.y > WINDOW_SIZE_Y - 70
+    .if [eax].playerObj.pos.y > WINDOW_SIZE_Y - 70 && [eax].playerObj.pos.y < 80000000h
         mov [eax].playerObj.pos.y, 20
     .endif
 
-    .if [eax].playerObj.pos.y <= 10
+    .if [eax].playerObj.pos.y <= 10 || [eax].playerObj.pos.y > 80000000h
         mov [eax].playerObj.pos.y, WINDOW_SIZE_Y - 80 
     .endif
 ret
@@ -449,21 +449,21 @@ fixArrowCoordinates proc addrArrow:dword
 assume eax:ptr arrow
     mov eax, addrArrow
 
-    .if [eax].arrowObj.pos.x > 1200                    ;should use constants but did this lazy af
-        mov [eax].arrowObj.pos.x, 20                   ;sorry
+    .if [eax].arrowObj.pos.x > WINDOW_SIZE_X && [eax].arrowObj.pos.x < 80000000h
+        mov [eax].arrowObj.pos.x, 20                  
     .endif
 
-    .if [eax].arrowObj.pos.x <= 10
+    .if [eax].arrowObj.pos.x <= 10 || [eax].arrowObj.pos.x > 80000000h
         mov [eax].arrowObj.pos.x, 1180 
     .endif
 
 
-    .if [eax].arrowObj.pos.y > 620
+    .if [eax].arrowObj.pos.y > WINDOW_SIZE_Y - 80 
         mov [eax].arrowObj.pos.y, 20
     .endif
 
     .if [eax].arrowObj.pos.y <= 10
-        mov [eax].arrowObj.pos.y, 610 
+        mov [eax].arrowObj.pos.y, WINDOW_SIZE_Y  - 90
     .endif
 ret
 fixArrowCoordinates endp
