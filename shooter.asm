@@ -458,12 +458,12 @@ assume eax:ptr arrow
     .endif
 
 
-    .if [eax].arrowObj.pos.y > WINDOW_SIZE_Y - 80 
+    .if [eax].arrowObj.pos.y > WINDOW_SIZE_Y - 80 && [eax].arrowObj.pos.y < 80000000h
         mov [eax].arrowObj.pos.y, 20
     .endif
 
-    .if [eax].arrowObj.pos.y <= 10
-        mov [eax].arrowObj.pos.y, WINDOW_SIZE_Y  - 90
+    .if [eax].arrowObj.pos.y <= 10 || [eax].arrowObj.pos.y > 80000000h
+        mov [eax].arrowObj.pos.y, WINDOW_SIZE_Y - 90 
     .endif
 ret
 fixArrowCoordinates endp
