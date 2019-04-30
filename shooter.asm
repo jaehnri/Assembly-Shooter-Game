@@ -103,6 +103,21 @@ loadImages proc
     invoke LoadBitmap, hInstance, 124
     mov A1_onGround, eax
 
+    invoke LoadBitmap, hInstance, 125
+    mov p2_right1, eax
+
+    invoke LoadBitmap, hInstance, 126
+    mov p2_right2, eax
+
+    invoke LoadBitmap, hInstance, 127
+    mov p2_right3, eax
+
+    invoke LoadBitmap, hInstance, 128
+    mov p2_right4, eax
+
+    invoke LoadBitmap, hInstance, 130
+    mov p2_spritesheet, eax
+
     ret
 loadImages endp
 
@@ -157,7 +172,19 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
             invoke SelectObject, _hMemDC, h_V2_top_right 
 
         .elseif player2.direction == D_RIGHT
-            invoke SelectObject, _hMemDC, h_V2_right 
+            .if RIGHTARROW == 1                          
+                .if walksequence == 1
+                    ;invoke SelectObject, _hMemDC, p2_right1
+                .elseif walksequence == 2
+                    ;invoke SelectObject, _hMemDC, p2_right2
+                .elseif walksequence == 3
+                    ;invoke SelectObject, _hMemDC, p2_right3 
+                .elseif walksequence == 4
+                    ;invoke SelectObject, _hMemDC, p2_right4 
+                .endif
+            .else 
+                invoke SelectObject, _hMemDC, p2_right1
+            .endif
 
         .elseif player2.direction == D_DOWN_RIGHT
             invoke SelectObject, _hMemDC, h_V2_down_right 
@@ -172,14 +199,24 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
             invoke SelectObject, _hMemDC, h_V2_left  
         .endif 
 
+        invoke SelectObject, _hMemDC, p2_spritesheet 
+
     ;________PLAYER 2 PAINTING________________________________________________________________________
+
+        mov eax, walksequence
+        mul PLAYER2_SIZE
+        mov edx, eax
+
+        mov eax, player2.direction
+        mul PLAYER2_SIZE
+        mov ecx, eax
 
         mov eax, player2.playerObj.pos.x
         mov ebx, player2.playerObj.pos.y
-        sub eax, PLAYER_HALF_SIZE
-        sub ebx, PLAYER_HALF_SIZE
+        sub eax, PLAYER2_HALF_SIZE
+        sub ebx, PLAYER2_HALF_SIZE
 
-        invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, 0, 0, SRCCOPY 
+        invoke BitBlt, _hdc, eax, ebx, PLAYER2_SIZE, PLAYER2_SIZE, _hMemDC, edx, ecx, SRCCOPY 
     ;________________________________________________________________________________
     
     ret
@@ -458,13 +495,13 @@ gameManager proc p:dword
             invoke Sleep, 30
 
 
-            .if player2.cooldownDash  != 10
+            .if player2.cooldownDash  != 255
                 inc player2.cooldownDash
             .else
                 mov player2CanDash, 1
             .endif
 
-            .if player1.cooldownDash != 10
+            .if player1.cooldownDash != 255
                 inc player1.cooldownDash
             .else
                 mov player1CanDash, 1
@@ -485,6 +522,43 @@ gameManager proc p:dword
                 invoke moveArrow, addr arrow1
             .else
                 mov arrow1.onGround, 1
+            .endif
+
+
+            .if walksequence == 1
+                .if walkanimationCD != 3
+                    inc walkanimationCD
+                .else 
+                    mov walksequence, 2
+                    mov walkanimationCD, 0
+                .endif
+            .endif
+
+            .if walksequence == 2
+                .if walkanimationCD != 3
+                    inc walkanimationCD
+                .else 
+                    mov walksequence, 3
+                    mov walkanimationCD, 0
+                .endif
+            .endif
+
+            .if walksequence == 3
+                .if walkanimationCD != 3
+                    inc walkanimationCD
+                .else 
+                    mov walksequence, 4
+                    mov walkanimationCD, 0
+                .endif
+            .endif
+
+            .if walksequence == 4
+                .if walkanimationCD != 3
+                    inc walkanimationCD
+                .else 
+                    mov walksequence, 1
+                    mov walkanimationCD, 0
+                .endif
             .endif
 
             invoke movePlayer, addr player1
@@ -617,6 +691,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         .elseif (wParam == VK_RIGHT) ;right arrow
             .if (player2.playerObj.speed.x < 80h)
                 mov player2.playerObj.speed.x, 0 
+                mov RIGHTARROW, 0
             .endif
         .endif
 
@@ -661,6 +736,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             mov player2.playerObj.speed.x, -PLAYER_SPEED
         .elseif (wParam == VK_RIGHT) ;right arrow
              mov player2.playerObj.speed.x, PLAYER_SPEED
+             mov RIGHTARROW, 1
         .elseif (wParam == 16) ;      ;RSHIFT
             .if player2CanDash == 1
                 mov player2DashClick, 1                              ; means the player CAN and WANTS TO dash                

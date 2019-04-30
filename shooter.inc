@@ -63,17 +63,21 @@ arrow ends
     WINDOW_SIZE_X EQU 1180
     WINDOW_SIZE_Y EQU 650
 
-    D_TOP_LEFT    EQU 0
+    D_TOP_LEFT    EQU 6
     D_TOP         EQU 1
-    D_TOP_RIGHT   EQU 2
-    D_RIGHT       EQU 3
+    D_TOP_RIGHT   EQU 7
+    D_RIGHT       EQU 0
     D_DOWN_RIGHT  EQU 4
-    D_DOWN        EQU 5
-    D_DOWN_LEFT   EQU 6
-    D_LEFT        EQU 7
+    D_DOWN        EQU 3
+    D_DOWN_LEFT   EQU 5
+    D_LEFT        EQU 2
 
     PLAYER_SIZE      EQU 50
     PLAYER_HALF_SIZE EQU PLAYER_SIZE / 2
+
+    PLAYER2_SIZE     EQU 48
+    PLAYER2_HALF_SIZE EQU PLAYER2_SIZE / 2
+
     ARROW_SIZE       EQU 46
     ARROW_HALF_SIZE  EQU ARROW_SIZE / 2
 
@@ -102,6 +106,12 @@ arrow ends
     h_V2_down           dd 0
     h_V2_down_left      dd 0
     h_V2_left           dd 0
+    
+    p2_right1         dd 0
+    p2_right2         dd 0
+    p2_right3         dd 0
+    p2_right4         dd 0
+    p2_spritesheet    dd 0
 
     ;Arrow 1 Bitmaps:
     A1_left             dd 0
@@ -117,7 +127,7 @@ arrow ends
     player1 player <<<100,350>,  <0,0>>, 0, 2, D_RIGHT>  ; dash initialized as 8 because 0 to 7 are directions, so 8 is the same as null 
     player2 player <<<1120,350>, <0,0>>, 0, 2, D_LEFT>
 
-    arrow1 arrow <<<50, 50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 1, 8>  
+    arrow1 arrow <<<-50, -50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 1, 8>  
     arrow2 arrow <<<50, 50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 2, 8>
 
     player1CanDash        BYTE 0
@@ -128,6 +138,13 @@ arrow ends
 
     arrow1Shot            BYTE 0
     arrow2Shot            BYTE 0 
+
+    walkanimationCD       BYTE 0
+    ;walksequence          BYTE 1
+    walksequence          BYTE 0
+    
+    RIGHTARROW            BYTE 0
+    
 
 .DATA?
     hWnd HWND ?
