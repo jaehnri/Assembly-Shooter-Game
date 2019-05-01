@@ -86,7 +86,7 @@ loadImages proc
     invoke LoadBitmap, hInstance, 112       
     mov h_V2_down_right, eax
 
-    invoke LoadBitmap, hInstance, 113       
+    invoke LoadBitmap, hInstance, 1        
     mov h_V2_down, eax
 
     invoke LoadBitmap, hInstance, 114       
@@ -161,7 +161,7 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
     ;_______________________________________________________________________________________
 
 
-    ;PLAYER 2___________________________________________
+   ;PLAYER 2___________________________________________
         .if player2.direction == D_TOP_LEFT
             invoke SelectObject, _hMemDC, h_V2_top_left
         
@@ -172,18 +172,62 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
             invoke SelectObject, _hMemDC, h_V2_top_right 
 
         .elseif player2.direction == D_RIGHT
-            .if RIGHTARROW == 1                          
-                .if walksequence == 1
-                    ;invoke SelectObject, _hMemDC, p2_right1
-                .elseif walksequence == 2
-                    ;invoke SelectObject, _hMemDC, p2_right2
-                .elseif walksequence == 3
-                    ;invoke SelectObject, _hMemDC, p2_right3 
-                .elseif walksequence == 4
-                    ;invoke SelectObject, _hMemDC, p2_right4 
+            .if player2.walking.rightarrow == 1                          
+                .if player2.walksequence == 1
+                
+                    invoke SelectObject, _hMemDC, p2_spritesheet
+                    
+                    mov ah, 1
+                    mov ebx, PLAYER2_SIZE
+                    mul ebx
+                    mov edx, eax
+
+                    mov ah, player2.direction
+                    mov ebx, PLAYER2_SIZE
+                    mul ebx
+                    mov ecx, eax
+
+                .elseif player2.walksequence == 2
+                    invoke SelectObject, _hMemDC, p2_spritesheet
+                    
+                    mov ah, 2
+                    mov ebx, PLAYER2_SIZE
+                    mul ebx
+                    mov edx, eax
+
+                    mov ah, player2.direction
+                    mov ebx, PLAYER2_SIZE
+                    mul ebx
+                    mov ecx, eax
+
+                .elseif player2.walksequence == 3
+                    invoke SelectObject, _hMemDC, p2_spritesheet
+                    
+                    mov ah, 3
+                    mov ebx, PLAYER2_SIZE
+                    mul ebx
+                    mov edx, eax
+
+                    mov ah, player2.direction
+                    mov ebx, PLAYER2_SIZE
+                    mul ebx
+                    mov ecx, eax 
+                    
+                .elseif player2.walksequence == 4
+                    invoke SelectObject, _hMemDC, p2_spritesheet
+                    
+                    mov ah, 4
+                    mov ebx, PLAYER2_SIZE
+                    mul ebx
+                    mov edx, eax
+
+                    mov ah, player2.direction
+                    mov ebx, PLAYER2_SIZE
+                    mul ebx
+                    mov ecx, eax
                 .endif
             .else 
-                invoke SelectObject, _hMemDC, p2_right1
+                invoke SelectObject, _hMemDC, p2_spritesheet
             .endif
 
         .elseif player2.direction == D_DOWN_RIGHT
@@ -199,17 +243,7 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
             invoke SelectObject, _hMemDC, h_V2_left  
         .endif 
 
-        invoke SelectObject, _hMemDC, p2_spritesheet 
-
     ;________PLAYER 2 PAINTING________________________________________________________________________
-
-        mov eax, walksequence
-        mul PLAYER2_SIZE
-        mov edx, eax
-
-        mov eax, player2.direction
-        mul PLAYER2_SIZE
-        mov ecx, eax
 
         mov eax, player2.playerObj.pos.x
         mov ebx, player2.playerObj.pos.y
@@ -495,13 +529,13 @@ gameManager proc p:dword
             invoke Sleep, 30
 
 
-            .if player2.cooldownDash  != 255
+            .if player2.cooldownDash  != 10
                 inc player2.cooldownDash
             .else
                 mov player2CanDash, 1
             .endif
 
-            .if player1.cooldownDash != 255
+            .if player1.cooldownDash != 10
                 inc player1.cooldownDash
             .else
                 mov player1CanDash, 1
@@ -525,39 +559,39 @@ gameManager proc p:dword
             .endif
 
 
-            .if walksequence == 1
-                .if walkanimationCD != 3
-                    inc walkanimationCD
+            .if player2.walksequence == 1
+                .if player2.walkanimationCD != 3
+                    inc player2.walkanimationCD
                 .else 
-                    mov walksequence, 2
-                    mov walkanimationCD, 0
+                    mov player2.walksequence, 2
+                    mov player2.walkanimationCD, 0
                 .endif
             .endif
 
-            .if walksequence == 2
-                .if walkanimationCD != 3
-                    inc walkanimationCD
+            .if player2.walksequence == 2
+                .if player2.walkanimationCD != 3
+                    inc player2.walkanimationCD
                 .else 
-                    mov walksequence, 3
-                    mov walkanimationCD, 0
+                    mov player2.walksequence, 3
+                    mov player2.walkanimationCD, 0
                 .endif
             .endif
 
-            .if walksequence == 3
-                .if walkanimationCD != 3
-                    inc walkanimationCD
+            .if player2.walksequence == 3
+                .if player2.walkanimationCD != 3
+                    inc player2.walkanimationCD
                 .else 
-                    mov walksequence, 4
-                    mov walkanimationCD, 0
+                    mov player2.walksequence, 4
+                    mov player2.walkanimationCD, 0
                 .endif
             .endif
 
-            .if walksequence == 4
-                .if walkanimationCD != 3
-                    inc walkanimationCD
+            .if player2.walksequence == 4
+                .if player2.walkanimationCD != 3
+                    inc player2.walkanimationCD
                 .else 
-                    mov walksequence, 1
-                    mov walkanimationCD, 0
+                    mov player2.walksequence, 1
+                    mov player2.walkanimationCD, 0
                 .endif
             .endif
 
@@ -691,7 +725,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         .elseif (wParam == VK_RIGHT) ;right arrow
             .if (player2.playerObj.speed.x < 80h)
                 mov player2.playerObj.speed.x, 0 
-                mov RIGHTARROW, 0
+                mov player2.walking.rightarrow, 0
             .endif
         .endif
 
@@ -736,7 +770,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             mov player2.playerObj.speed.x, -PLAYER_SPEED
         .elseif (wParam == VK_RIGHT) ;right arrow
              mov player2.playerObj.speed.x, PLAYER_SPEED
-             mov RIGHTARROW, 1
+             mov player2.walking.rightarrow, 1
         .elseif (wParam == 16) ;      ;RSHIFT
             .if player2CanDash == 1
                 mov player2DashClick, 1                              ; means the player CAN and WANTS TO dash                

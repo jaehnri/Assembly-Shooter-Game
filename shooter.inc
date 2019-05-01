@@ -1,4 +1,4 @@
-include c:\masm32\include\masm32rt.inc
+include \masm32\include\masm32rt.inc
 
 ;include \masm32\include\windows.inc 
 ;include \masm32\include\user32.inc 
@@ -34,17 +34,37 @@ point struct
     y dd 0
 point ends
 
+animation struct
+    rightarrow   BYTE 0
+    leftarrow    BYTE 0
+    toparrow     BYTE 0
+    downarrow    BYTE 0
+
+    rightseq     BYTE 0
+    leftseq      BYTE 0
+    downseq      BYTE 0
+    topseq       BYTE 0
+
+    topleftseq   BYTE 0
+    toprightseq  BYTE 0
+    downrightseq BYTE 0
+    downleftseq  BYTE 0
+animation ends
+
 gameObject struct
-    pos   point <>
-    speed point <> ; horizontal and vertical speeds
+    pos      point <>
+    speed    point <> ; horizontal and vertical speeds
 gameObject ends
 
 player struct
     playerObj gameObject <>
+    walking  animation <> ; for running animation
 
-    cooldownDash BYTE 0
-    life         BYTE 2
-    direction    BYTE 0
+    cooldownDash          BYTE 0
+    life                  BYTE 2
+    direction             BYTE 0
+    walkanimationCD       BYTE 0
+    walksequence          BYTE 0
 player ends
 
 arrow struct
@@ -63,19 +83,20 @@ arrow ends
     WINDOW_SIZE_X EQU 1180
     WINDOW_SIZE_Y EQU 650
 
-    D_TOP_LEFT    EQU 6
-    D_TOP         EQU 1
-    D_TOP_RIGHT   EQU 7
-    D_RIGHT       EQU 0
-    D_DOWN_RIGHT  EQU 4
+    D_RIGHT       EQU 0 
+    D_TOP         EQU 1  
+    D_LEFT        EQU 2     
     D_DOWN        EQU 3
+    D_DOWN_RIGHT  EQU 4
     D_DOWN_LEFT   EQU 5
-    D_LEFT        EQU 2
+    D_TOP_LEFT    EQU 6
+    D_TOP_RIGHT   EQU 7
+
 
     PLAYER_SIZE      EQU 50
     PLAYER_HALF_SIZE EQU PLAYER_SIZE / 2
 
-    PLAYER2_SIZE     EQU 48
+    PLAYER2_SIZE     EQU 60
     PLAYER2_HALF_SIZE EQU PLAYER2_SIZE / 2
 
     ARROW_SIZE       EQU 46
@@ -124,8 +145,8 @@ arrow ends
     over byte 0                                ; control game state (occuring or terminated)
 
     ; Players
-    player1 player <<<100,350>,  <0,0>>, 0, 2, D_RIGHT>  ; dash initialized as 8 because 0 to 7 are directions, so 8 is the same as null 
-    player2 player <<<1120,350>, <0,0>>, 0, 2, D_LEFT>
+    player1 player <<<100,350>,  <0,0>>, <0,0,0,0,0,0,0,0,0,0,0,0>, 0, 2, 0, 0, D_RIGHT>  ; dash initialized as 8 because 0 to 7 are directions, so 8 is the same as null 
+    player2 player <<<1120,350>, <0,0>>, <0,0,0,0,0,0,0,0,0,0,0,0>, 0, 2, 0, 0, D_LEFT>
 
     arrow1 arrow <<<-50, -50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 1, 8>  
     arrow2 arrow <<<50, 50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 2, 8>
@@ -138,10 +159,6 @@ arrow ends
 
     arrow1Shot            BYTE 0
     arrow2Shot            BYTE 0 
-
-    walkanimationCD       BYTE 0
-    ;walksequence          BYTE 1
-    walksequence          BYTE 0
     
     RIGHTARROW            BYTE 0
     
