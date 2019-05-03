@@ -121,7 +121,19 @@ loadImages proc
     ret
 loadImages endp
 
-;printPlayer proc
+;______________________________________________________________________________
+
+isStopped proc addrPlayer:dword
+assume edx:ptr player
+    mov edx, addrPlayer
+
+.if [edx].playerObj.speed.x == 0  && [edx].playerObj.speed.y == 0
+    mov [edx].stopped, 1
+.endif
+
+ret
+isStopped endp
+;______________________________________________________________________________
 
 paintPlayers proc _hdc:HDC, _hMemDC:HDC
     ;PLAYER 1___________________________________________
@@ -161,87 +173,25 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
     ;_______________________________________________________________________________________
 
 
-   ;PLAYER 2___________________________________________
-        .if player2.direction == D_TOP_LEFT
-            invoke SelectObject, _hMemDC, h_V2_top_left
-        
-        .elseif player2.direction == D_TOP
-            invoke SelectObject, _hMemDC, h_V2_top
+   ;PLAYER 2___________________________________________       
 
-        .elseif player2.direction == D_TOP_RIGHT
-            invoke SelectObject, _hMemDC, h_V2_top_right 
+        invoke SelectObject, _hMemDC, p2_spritesheet
 
-        .elseif player2.direction == D_RIGHT
-            .if player2.walking.rightarrow == 1                          
-                .if player2.walksequence == 1
-                
-                    invoke SelectObject, _hMemDC, p2_spritesheet
-                    
-                    mov ah, 1
-                    mov ebx, PLAYER2_SIZE
-                    mul ebx
-                    mov edx, eax
+        movsx eax, player2.direction
+        mov ebx, PLAYER2_SIZE
+        mul ebx
+        mov ecx, eax
 
-                    mov ah, player2.direction
-                    mov ebx, PLAYER2_SIZE
-                    mul ebx
-                    mov ecx, eax
+        invoke isStopped, addr player2
 
-                .elseif player2.walksequence == 2
-                    invoke SelectObject, _hMemDC, p2_spritesheet
-                    
-                    mov ah, 2
-                    mov ebx, PLAYER2_SIZE
-                    mul ebx
-                    mov edx, eax
-
-                    mov ah, player2.direction
-                    mov ebx, PLAYER2_SIZE
-                    mul ebx
-                    mov ecx, eax
-
-                .elseif player2.walksequence == 3
-                    invoke SelectObject, _hMemDC, p2_spritesheet
-                    
-                    mov ah, 3
-                    mov ebx, PLAYER2_SIZE
-                    mul ebx
-                    mov edx, eax
-
-                    mov ah, player2.direction
-                    mov ebx, PLAYER2_SIZE
-                    mul ebx
-                    mov ecx, eax 
-                    
-                .elseif player2.walksequence == 4
-                    invoke SelectObject, _hMemDC, p2_spritesheet
-                    
-                    mov ah, 4
-                    mov ebx, PLAYER2_SIZE
-                    mul ebx
-                    mov edx, eax
-
-                    mov ah, player2.direction
-                    mov ebx, PLAYER2_SIZE
-                    mul ebx
-                    mov ecx, eax
-                .endif
-            .else 
-                invoke SelectObject, _hMemDC, p2_spritesheet
-            .endif
-
-        .elseif player2.direction == D_DOWN_RIGHT
-            invoke SelectObject, _hMemDC, h_V2_down_right 
-
-        .elseif player2.direction == D_DOWN
-            invoke SelectObject, _hMemDC, h_V2_down 
-
-        .elseif player2.direction == D_DOWN_LEFT
-            invoke SelectObject, _hMemDC, h_V2_down_left 
-
-        .else ;left is the last possible direction
-            invoke SelectObject, _hMemDC, h_V2_left  
-        .endif 
+        .if player2.stopped == 1
+            mov edx, 0
+        .else
+            movsx eax, player2.walksequence
+            mov ebx, PLAYER2_SIZE               ; se for mudar hitbox, essa e a largura
+            mul ebx
+            mov edx, eax
+        .endif
 
     ;________PLAYER 2 PAINTING________________________________________________________________________
 
@@ -524,6 +474,7 @@ fixArrowCoordinates endp
 
 ;______________________________________________________________________________
 
+
 gameManager proc p:dword
         .while !over
             invoke Sleep, 30
@@ -559,6 +510,15 @@ gameManager proc p:dword
             .endif
 
 
+            .if player2.walksequence == 0
+                .if player2.walkanimationCD != 3
+                    inc player2.walkanimationCD
+                .else 
+                    mov player2.walksequence, 1
+                    mov player2.walkanimationCD, 0
+                .endif
+            .endif
+
             .if player2.walksequence == 1
                 .if player2.walkanimationCD != 3
                     inc player2.walkanimationCD
@@ -590,7 +550,16 @@ gameManager proc p:dword
                 .if player2.walkanimationCD != 3
                     inc player2.walkanimationCD
                 .else 
-                    mov player2.walksequence, 1
+                    mov player2.walksequence, 5
+                    mov player2.walkanimationCD, 0
+                .endif
+            .endif
+
+            .if player2.walksequence == 5
+                .if player2.walkanimationCD != 3
+                    inc player2.walkanimationCD
+                .else 
+                    mov player2.walksequence, 0
                     mov player2.walkanimationCD, 0
                 .endif
             .endif
@@ -712,7 +681,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     ; PLAYER 2 __________________________________________________________________
         .elseif (wParam == VK_UP) ;up arrow
             .if (player2.playerObj.speed.y > 7fh) 
-                mov player2.playerObj.speed.y, 0 
+                mov player2.playerObj.speed.y, 0
             .endif
         .elseif (wParam == VK_DOWN) ;down arrow
             .if (player2.playerObj.speed.y < 80h) 
@@ -725,7 +694,6 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         .elseif (wParam == VK_RIGHT) ;right arrow
             .if (player2.playerObj.speed.x < 80h)
                 mov player2.playerObj.speed.x, 0 
-                mov player2.walking.rightarrow, 0
             .endif
         .endif
 
@@ -764,13 +732,16 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
         .elseif (wParam == VK_UP) ;up arrow
             mov player2.playerObj.speed.y, -PLAYER_SPEED
+            mov player2.stopped, 0
         .elseif (wParam == VK_DOWN) ;down arrow 
             mov player2.playerObj.speed.y, PLAYER_SPEED
+            mov player2.stopped, 0
         .elseif (wParam == VK_LEFT) ;left arrow
             mov player2.playerObj.speed.x, -PLAYER_SPEED
+            mov player2.stopped, 0
         .elseif (wParam == VK_RIGHT) ;right arrow
              mov player2.playerObj.speed.x, PLAYER_SPEED
-             mov player2.walking.rightarrow, 1
+             mov player2.stopped, 0
         .elseif (wParam == 16) ;      ;RSHIFT
             .if player2CanDash == 1
                 mov player2DashClick, 1                              ; means the player CAN and WANTS TO dash                
