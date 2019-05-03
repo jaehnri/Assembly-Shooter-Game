@@ -600,7 +600,7 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
     mov   wc.cbWndExtra,NULL 
     push  hInstance 
     pop   wc.hInstance 
-    mov   wc.hbrBackground, COLOR_WINDOW + 3 ; black window
+    mov   wc.hbrBackground, COLOR_WINDOW + 1; black window
     mov   wc.lpszMenuName,NULL 
     mov   wc.lpszClassName ,OFFSET ClassName 
     invoke LoadIcon, NULL, IDI_APPLICATION 
