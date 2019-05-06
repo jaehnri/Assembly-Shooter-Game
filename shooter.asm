@@ -123,6 +123,51 @@ loadImages endp
 
 ;______________________________________________________________________________
 
+isColliding proc obj1Pos:point, obj2Pos:point, obj1Size:point, obj2Size:point
+
+    ;.if obj1Pos.x < obj2Pos.x + obj2Size.x && \
+    ;    obj1Pos.x + obj1Size.x > obj2Pos.x && \
+    ;    obj1Pos.y < obj2Pos.y + obj2Size.y && \
+    ;    obj1Pos.y + obj1Size.y > obj2Pos.y
+    ;    mov eax, TRUE
+    ;.else
+    ;    mov eax, FALSE
+    ;.endif
+    
+    push eax
+    push ebx
+
+    mov eax, obj1Pos.x
+    add eax, obj1Size.x ; eax = obj1Pos.x + obj1Size.x
+    mov ebx, obj2Pos.x
+    add ebx, obj2Size.x ; ebx = obj2Pos.x + obj2Size.x
+
+    .if obj1Pos.x < ebx && eax > obj2Pos.x
+        mov eax, obj1Pos.y
+        add eax, obj1Size.y ; eax = obj1Pos.y + obj1Size.y
+        mov ebx, obj2Pos.y
+        add ebx, obj2Size.y ; ebx = obj2Pos.y + obj2Size.y
+        
+        .if obj1Pos.y < ebx && eax > obj2Pos.y
+            ; the objects are colliding
+            mov edx, TRUE
+        .else
+            mov edx, FALSE
+        .endif
+    .else
+        mov edx, FALSE
+    .endif
+
+    pop ebx
+    pop eax
+
+    ret
+
+isColliding endp
+
+
+;______________________________________________________________________________
+
 isStopped proc addrPlayer:dword
 assume edx:ptr player
     mov edx, addrPlayer
@@ -479,6 +524,11 @@ gameManager proc p:dword
         .while !over
             invoke Sleep, 30
 
+            invoke isColliding, player1.playerObj.pos, PLAYER_SIZE_POS_S, player2.playerObj.pos, PLAYER_SIZE_POS_S
+            .if edx == TRUE
+                invoke wsprintf, ADDR buffer, ADDR test_header_format, edx
+                invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL 
+            .endif
 
             .if player2.cooldownDash  != 10
                 inc player2.cooldownDash

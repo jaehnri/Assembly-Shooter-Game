@@ -74,7 +74,6 @@ arrow ends
     D_TOP_LEFT    EQU 6
     D_TOP_RIGHT   EQU 7
 
-
     PLAYER_SIZE      EQU 50
     PLAYER_HALF_SIZE EQU PLAYER_SIZE / 2
 
@@ -90,6 +89,8 @@ arrow ends
     DASH_DISTANCE EQU 100
 
 .DATA
+    PLAYER_SIZE_POS_S point <50,50>
+
     ;Player 1 Bitmaps:
     h_V1_top_left       dd 0
     h_V1_top            dd 0
