@@ -74,11 +74,14 @@ arrow ends
     D_TOP_LEFT    EQU 6
     D_TOP_RIGHT   EQU 7
 
-    PLAYER_SIZE      EQU 50
+    ;PLAYER_SIZE      EQU 50
+    ;PLAYER_HALF_SIZE EQU PLAYER_SIZE / 2
+
+    PLAYER_SIZE      EQU 48
     PLAYER_HALF_SIZE EQU PLAYER_SIZE / 2
 
-    PLAYER2_SIZE     EQU 48
-    PLAYER2_HALF_SIZE EQU PLAYER2_SIZE / 2
+    ;PLAYER2_SIZE     EQU 48
+    ;PLAYER2_HALF_SIZE EQU PLAYER2_SIZE / 2
 
     ARROW_SIZE       EQU 46
     ARROW_HALF_SIZE  EQU ARROW_SIZE / 2
@@ -111,11 +114,13 @@ arrow ends
     h_V2_down_left      dd 0
     h_V2_left           dd 0
     
-    p2_right1         dd 0
-    p2_right2         dd 0
-    p2_right3         dd 0
-    p2_right4         dd 0
+    ;p2_right1         dd 0
+    ;p2_right2         dd 0
+    ;p2_right3         dd 0
+    ;p2_right4         dd 0
     p2_spritesheet    dd 0
+    
+    p1_spritesheet    dd 0
 
     ;Arrow 1 Bitmaps:
     A1_left             dd 0
