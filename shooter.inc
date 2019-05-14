@@ -83,8 +83,8 @@ arrow ends
     ;PLAYER2_SIZE     EQU 48
     ;PLAYER2_HALF_SIZE EQU PLAYER2_SIZE / 2
 
-    ARROW_SIZE       EQU 46
-    ARROW_HALF_SIZE  EQU ARROW_SIZE / 2
+    ;ARROW_SIZE       EQU 46
+    ;ARROW_HALF_SIZE  EQU ARROW_SIZE / 2
 
     PLAYER_SPEED  EQU 6
     ARROW_SPEED   EQU 50
@@ -92,7 +92,9 @@ arrow ends
     DASH_DISTANCE EQU 100
 
 .DATA
-    PLAYER_SIZE_POS_S point <50,50>
+    PLAYER_SIZE_POINT  point <46,46>
+    ARROW_SIZE_POINT   point <42,20>
+    ARROW_HALF_SIZE_P  point <21,10>
 
     ;Player 1 Bitmaps:
     h_V1_top_left       dd 0

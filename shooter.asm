@@ -299,10 +299,10 @@ paintArrows proc _hdc:HDC, _hMemDC:HDC
 
         mov eax, arrow1.arrowObj.pos.x
         mov ebx, arrow1.arrowObj.pos.y
-        sub eax, ARROW_HALF_SIZE
-        sub ebx, ARROW_HALF_SIZE
+        sub eax, ARROW_HALF_SIZE_P.x
+        sub ebx, ARROW_HALF_SIZE_P.y
 
-        invoke BitBlt, _hdc, eax, ebx, ARROW_SIZE, ARROW_SIZE, _hMemDC, 0, 0, SRCCOPY 
+        invoke BitBlt, _hdc, eax, ebx, ARROW_SIZE_POINT.x, ARROW_SIZE_POINT.y, _hMemDC, 0, 0, SRCCOPY 
     
     ret
 paintArrows endp
@@ -558,10 +558,15 @@ gameManager proc p:dword
         .while !over
             invoke Sleep, 30
 
-            invoke isColliding, player1.playerObj.pos, PLAYER_SIZE_POS_S, player2.playerObj.pos, PLAYER_SIZE_POS_S
+            ;invoke isColliding, player1.playerObj.pos, player2.playerObj.pos, PLAYER_SIZE_POS_S, PLAYER_SIZE_POS_S
+            ;.if edx == TRUE
+            ;    invoke wsprintf, ADDR buffer, ADDR test_header_format, edx
+            ;    invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL
+            ;.endif
+            invoke isColliding, player2.playerObj.pos, arrow1.arrowObj.pos, PLAYER_SIZE_POINT, ARROW_SIZE_POINT
             .if edx == TRUE
-                invoke wsprintf, ADDR buffer, ADDR test_header_format, edx
-                invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL 
+                mov player2.playerObj.pos.x, 50
+                mov player2.playerObj.pos.y, 50
             .endif
 
             .if player2.cooldownDash  != 10
