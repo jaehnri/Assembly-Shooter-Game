@@ -103,23 +103,71 @@ loadImages proc
     invoke LoadBitmap, hInstance, 124
     mov A1_onGround, eax
 
-    invoke LoadBitmap, hInstance, 125
-    mov p2_right1, eax
+    ;invoke LoadBitmap, hInstance, 125
+    ;mov p2_right1, eax
 
-    invoke LoadBitmap, hInstance, 126
-    mov p2_right2, eax
+    ;invoke LoadBitmap, hInstance, 126
+    ;mov p2_right2, eax
 
-    invoke LoadBitmap, hInstance, 127
-    mov p2_right3, eax
+    ;invoke LoadBitmap, hInstance, 127
+    ;mov p2_right3, eax
 
-    invoke LoadBitmap, hInstance, 128
-    mov p2_right4, eax
+    ;invoke LoadBitmap, hInstance, 128
+    ;mov p2_right4, eax
 
     invoke LoadBitmap, hInstance, 130
     mov p2_spritesheet, eax
 
+    invoke LoadBitmap, hInstance, 134
+    mov p1_spritesheet, eax
+
     ret
 loadImages endp
+
+;______________________________________________________________________________
+
+isColliding proc obj1Pos:point, obj2Pos:point, obj1Size:point, obj2Size:point
+
+    ;.if obj1Pos.x < obj2Pos.x + obj2Size.x && \
+    ;    obj1Pos.x + obj1Size.x > obj2Pos.x && \
+    ;    obj1Pos.y < obj2Pos.y + obj2Size.y && \
+    ;    obj1Pos.y + obj1Size.y > obj2Pos.y
+    ;    mov eax, TRUE
+    ;.else
+    ;    mov eax, FALSE
+    ;.endif
+    
+    push eax
+    push ebx
+
+    mov eax, obj1Pos.x
+    add eax, obj1Size.x ; eax = obj1Pos.x + obj1Size.x
+    mov ebx, obj2Pos.x
+    add ebx, obj2Size.x ; ebx = obj2Pos.x + obj2Size.x
+
+    .if obj1Pos.x < ebx && eax > obj2Pos.x
+        mov eax, obj1Pos.y
+        add eax, obj1Size.y ; eax = obj1Pos.y + obj1Size.y
+        mov ebx, obj2Pos.y
+        add ebx, obj2Size.y ; ebx = obj2Pos.y + obj2Size.y
+        
+        .if obj1Pos.y < ebx && eax > obj2Pos.y
+            ; the objects are colliding
+            mov edx, TRUE
+        .else
+            mov edx, FALSE
+        .endif
+    .else
+        mov edx, FALSE
+    .endif
+
+    pop ebx
+    pop eax
+
+    ret
+
+isColliding endp
+
 
 ;______________________________________________________________________________
 
@@ -136,49 +184,80 @@ isStopped endp
 ;______________________________________________________________________________
 
 paintPlayers proc _hdc:HDC, _hMemDC:HDC
-    ;PLAYER 1___________________________________________
-        .if player1.direction == D_TOP_LEFT
-            invoke SelectObject, _hMemDC, h_V1_top_left
-        
-        .elseif player1.direction == D_TOP
-            invoke SelectObject, _hMemDC, h_V1_top
 
-        .elseif player1.direction == D_TOP_RIGHT
-            invoke SelectObject, _hMemDC, h_V1_top_right 
+    ; Old way to paint players
+    ;;PLAYER 1___________________________________________
+    ;    .if player1.direction == D_TOP_LEFT
+    ;        invoke SelectObject, _hMemDC, h_V1_top_left
+    ;    
+    ;    .elseif player1.direction == D_TOP
+    ;        invoke SelectObject, _hMemDC, h_V1_top
+;
+    ;    .elseif player1.direction == D_TOP_RIGHT
+    ;        invoke SelectObject, _hMemDC, h_V1_top_right 
+;
+    ;    .elseif player1.direction == D_RIGHT
+    ;        invoke SelectObject, _hMemDC, h_V1_right 
+;
+    ;    .elseif player1.direction == D_DOWN_RIGHT
+    ;        invoke SelectObject, _hMemDC, h_V1_down_right 
+;
+    ;    .elseif player1.direction == D_DOWN
+    ;        invoke SelectObject, _hMemDC, h_V1_down 
+;
+    ;    .elseif player1.direction == D_DOWN_LEFT
+    ;        invoke SelectObject, _hMemDC, h_V1_down_left 
+;
+    ;    .elseif player1.direction == D_LEFT ;left is the last possible direction
+    ;        invoke SelectObject, _hMemDC, h_V1_left  
+    ;    .endif  
+;
+    ;;________PLAYER 1 PAINTING_____________________________________________________________
+;
+    ;    mov eax, player1.playerObj.pos.x
+    ;    mov ebx, player1.playerObj.pos.y
+    ;    sub eax, PLAYER_HALF_SIZE
+    ;    sub ebx, PLAYER_HALF_SIZE
+;
+    ;    invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, 0, 0, SRCCOPY 
+    ;;_______________________________________________________________________________________
 
-        .elseif player1.direction == D_RIGHT
-            invoke SelectObject, _hMemDC, h_V1_right 
+   ;PLAYER 1___________________________________________
+        invoke SelectObject, _hMemDC, p1_spritesheet
 
-        .elseif player1.direction == D_DOWN_RIGHT
-            invoke SelectObject, _hMemDC, h_V1_down_right 
+        movsx eax, player1.direction
+        mov ebx, PLAYER_SIZE
+        mul ebx
+        mov ecx, eax
 
-        .elseif player1.direction == D_DOWN
-            invoke SelectObject, _hMemDC, h_V1_down 
+        invoke isStopped, addr player1
 
-        .elseif player1.direction == D_DOWN_LEFT
-            invoke SelectObject, _hMemDC, h_V1_down_left 
+        .if player1.stopped == 1
+            mov edx, 0
+        .else
+            movsx eax, player1.walksequence
+            mov ebx, PLAYER_SIZE               ; se for mudar hitbox, essa e a largura
+            mul ebx
+            mov edx, eax
+        .endif
 
-        .elseif player1.direction == D_LEFT ;left is the last possible direction
-            invoke SelectObject, _hMemDC, h_V1_left  
-        .endif  
-
-    ;________PLAYER 1 PAINTING_____________________________________________________________
+    ;________PLAYER 1 PAINTING________________________________________________________________________
 
         mov eax, player1.playerObj.pos.x
         mov ebx, player1.playerObj.pos.y
         sub eax, PLAYER_HALF_SIZE
         sub ebx, PLAYER_HALF_SIZE
 
-        invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, 0, 0, SRCCOPY 
-    ;_______________________________________________________________________________________
+        invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, edx, ecx, SRCCOPY 
+    ;________________________________________________________________________________
 
 
-   ;PLAYER 2___________________________________________       
+   ;PLAYER 2___________________________________________
 
         invoke SelectObject, _hMemDC, p2_spritesheet
 
         movsx eax, player2.direction
-        mov ebx, PLAYER2_SIZE
+        mov ebx, PLAYER_SIZE
         mul ebx
         mov ecx, eax
 
@@ -188,7 +267,7 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
             mov edx, 0
         .else
             movsx eax, player2.walksequence
-            mov ebx, PLAYER2_SIZE               ; se for mudar hitbox, essa e a largura
+            mov ebx, PLAYER_SIZE               ; se for mudar hitbox, essa e a largura
             mul ebx
             mov edx, eax
         .endif
@@ -197,10 +276,10 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
 
         mov eax, player2.playerObj.pos.x
         mov ebx, player2.playerObj.pos.y
-        sub eax, PLAYER2_HALF_SIZE
-        sub ebx, PLAYER2_HALF_SIZE
+        sub eax, PLAYER_HALF_SIZE
+        sub ebx, PLAYER_HALF_SIZE
 
-        invoke BitBlt, _hdc, eax, ebx, PLAYER2_SIZE, PLAYER2_SIZE, _hMemDC, edx, ecx, SRCCOPY 
+        invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, edx, ecx, SRCCOPY 
     ;________________________________________________________________________________
     
     ret
@@ -220,10 +299,10 @@ paintArrows proc _hdc:HDC, _hMemDC:HDC
 
         mov eax, arrow1.arrowObj.pos.x
         mov ebx, arrow1.arrowObj.pos.y
-        sub eax, ARROW_HALF_SIZE
-        sub ebx, ARROW_HALF_SIZE
+        sub eax, ARROW_HALF_SIZE_P.x
+        sub ebx, ARROW_HALF_SIZE_P.y
 
-        invoke BitBlt, _hdc, eax, ebx, ARROW_SIZE, ARROW_SIZE, _hMemDC, 0, 0, SRCCOPY 
+        invoke BitBlt, _hdc, eax, ebx, ARROW_SIZE_POINT.x, ARROW_SIZE_POINT.y, _hMemDC, 0, 0, SRCCOPY 
     
     ret
 paintArrows endp
@@ -479,6 +558,16 @@ gameManager proc p:dword
         .while !over
             invoke Sleep, 30
 
+            ;invoke isColliding, player1.playerObj.pos, player2.playerObj.pos, PLAYER_SIZE_POS_S, PLAYER_SIZE_POS_S
+            ;.if edx == TRUE
+            ;    invoke wsprintf, ADDR buffer, ADDR test_header_format, edx
+            ;    invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL
+            ;.endif
+            invoke isColliding, player2.playerObj.pos, arrow1.arrowObj.pos, PLAYER_SIZE_POINT, ARROW_SIZE_POINT
+            .if edx == TRUE
+                mov player2.playerObj.pos.x, 50
+                mov player2.playerObj.pos.y, 50
+            .endif
 
             .if player2.cooldownDash  != 10
                 inc player2.cooldownDash
@@ -509,6 +598,65 @@ gameManager proc p:dword
                 mov arrow1.onGround, 1
             .endif
 
+
+            ; ----- PLAYER 1 WALKING SEQUENCE ------
+
+            .if player1.walksequence == 0
+                .if player1.walkanimationCD != 3
+                    inc player1.walkanimationCD
+                .else
+                    mov player1.walksequence, 1
+                    mov player1.walkanimationCD, 0
+                .endif
+            .endif
+
+            .if player1.walksequence == 1
+                .if player1.walkanimationCD != 3
+                    inc player1.walkanimationCD
+                .else 
+                    mov player1.walksequence, 2
+                    mov player1.walkanimationCD, 0
+                .endif
+            .endif
+
+            .if player1.walksequence == 2
+                .if player1.walkanimationCD != 3
+                    inc player1.walkanimationCD
+                .else 
+                    mov player1.walksequence, 3
+                    mov player1.walkanimationCD, 0
+                .endif
+            .endif
+
+            .if player1.walksequence == 3
+                .if player1.walkanimationCD != 3
+                    inc player1.walkanimationCD
+                .else 
+                    mov player1.walksequence, 4
+                    mov player1.walkanimationCD, 0
+                .endif
+            .endif
+
+            .if player1.walksequence == 4
+                .if player1.walkanimationCD != 3
+                    inc player1.walkanimationCD
+                .else 
+                    mov player1.walksequence, 5
+                    mov player1.walkanimationCD, 0
+                .endif
+            .endif
+
+            .if player1.walksequence == 5
+                .if player1.walkanimationCD != 3
+                    inc player1.walkanimationCD
+                .else 
+                    mov player1.walksequence, 0
+                    mov player1.walkanimationCD, 0
+                .endif
+            .endif
+
+
+            ; ----- PLAYER 2 WALKING SEQUENCE ------
 
             .if player2.walksequence == 0
                 .if player2.walkanimationCD != 3
@@ -705,12 +853,16 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     ;___________________PLAYER 1 MOVEMENT KEYS____________________________________
         .if (wParam == 57h) ; w
             mov player1.playerObj.speed.y, -PLAYER_SPEED
+            mov player1.stopped, 0
         .elseif (wParam == 53h) ; s
             mov player1.playerObj.speed.y, PLAYER_SPEED
+            mov player1.stopped, 0
         .elseif (wParam == 41h) ; a
             mov player1.playerObj.speed.x, -PLAYER_SPEED
+            mov player1.stopped, 0
         .elseif (wParam == 44h) ; d
             mov player1.playerObj.speed.x, PLAYER_SPEED
+            mov player1.stopped, 0
         .elseif (wParam == 46h) ; f
             .if player1CanDash == 1
                 mov player1DashClick, 1                              ; means the player CAN and WANTS TO dash                
