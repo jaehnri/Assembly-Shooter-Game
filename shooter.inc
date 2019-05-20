@@ -45,8 +45,10 @@ player struct
     cooldownDash          BYTE 0
     life                  BYTE 2
     direction             BYTE 0
-    walkanimationCD       BYTE 0
+    walkanimationCD       BYTE 0 ; cooldown
     walksequence          BYTE 0
+    dashanimationCD       BYTE 0 ; cooldown
+    dashsequence          BYTE 0 
 player ends
 
 arrow struct
@@ -89,7 +91,8 @@ arrow ends
     PLAYER_SPEED  EQU 6
     ARROW_SPEED   EQU 50
 
-    DASH_DISTANCE EQU 100
+    DASH_DISTANCE EQU 25
+    DASH_SPEED    EQU 16
 
 .DATA
     PLAYER_SIZE_POINT  point <46,46>
@@ -135,8 +138,8 @@ arrow ends
     over byte 0                                ; control game state (occuring or terminated)
 
     ; Players
-    player1 player <<<100,350>,  <0,0>>, 0, 0, 2, 0, 0, D_RIGHT>  ; dash initialized as 8 because 0 to 7 are directions, so 8 is the same as null 
-    player2 player <<<1120,350>, <0,0>>, 0, 0, 2, 0, 0, D_LEFT>
+    player1 player <<<100,350>,  <0,0>>, 0, 0, 2, 0, 0, D_RIGHT, 0, 0>  ; dash initialized as 8 because 0 to 7 are directions, so 8 is the same as null 
+    player2 player <<<1120,350>, <0,0>>, 0, 0, 2, 0, 0, D_LEFT, 0, 0>
 
     arrow1 arrow <<<-50, -50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 1, 8>  
     arrow2 arrow <<<50, 50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 2, 8>
