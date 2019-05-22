@@ -214,6 +214,21 @@ paintArrows proc _hdc:HDC, _hMemDC:HDC
         sub ebx, ARROW_HALF_SIZE_P.y
 
         invoke BitBlt, _hdc, eax, ebx, ARROW_SIZE_POINT.x, ARROW_SIZE_POINT.y, _hMemDC, 0, 0, SRCCOPY 
+
+
+;________PLAYER 2 PAINTING_____________________________________________________________
+        .if arrow2.onGround == 1 
+            invoke SelectObject, _hMemDC, A1_onGround
+        .else
+            invoke SelectObject, _hMemDC, A1_left  
+        .endif
+
+        mov eax, arrow2.arrowObj.pos.x
+        mov ebx, arrow2.arrowObj.pos.y
+        sub eax, ARROW_HALF_SIZE_P.x
+        sub ebx, ARROW_HALF_SIZE_P.y
+
+        invoke BitBlt, _hdc, eax, ebx, ARROW_SIZE_POINT.x, ARROW_SIZE_POINT.y, _hMemDC, 0, 0, SRCCOPY 
     
     ret
 paintArrows endp
@@ -494,6 +509,22 @@ gameManager proc p:dword
                 .endif
             .endif
 
+            invoke isColliding, player1.playerObj.pos, arrow2.arrowObj.pos, PLAYER_SIZE_POINT, ARROW_SIZE_POINT
+            .if edx == TRUE
+                mov player1.playerObj.pos.x, 50
+                mov player1.playerObj.pos.y, 50
+            .endif
+
+            invoke isColliding, player2.playerObj.pos, arrow2.arrowObj.pos, PLAYER_SIZE_POINT, ARROW_SIZE_POINT
+            .if edx == TRUE
+                .if arrow2.onGround == 1
+                    ;mov arrow1.onGround, 0               ; pick up arrow from the ground
+                    mov arrow2.arrowObj.pos.x, -100
+                    mov arrow2.arrowObj.pos.y, -100
+                    mov arrow2.playerOwns, 1
+                .endif
+            .endif
+
             .if player2.cooldownDash  != 30
                 inc player2.cooldownDash
             .else
@@ -521,6 +552,12 @@ gameManager proc p:dword
                 invoke moveArrow, addr arrow1
             .else
                 mov arrow1.onGround, 1
+            .endif
+
+            .if arrow2.remainingDistance > 0
+                invoke moveArrow, addr arrow2
+            .else
+                mov arrow2.onGround, 1
             .endif
 
 
@@ -680,7 +717,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     .ELSEIF uMsg == WM_KEYUP
     ; PLAYER 1 ____________________________________________________________________
     ;.if player1.dashsequence == 0
-    
+
         ; TODO: FAZER VARIAVEL QUE GUARDA SE O KEYUP FOI APERTADO OU NAO
 
         .if (wParam == 77h || wParam == 57h) ;w
@@ -778,14 +815,29 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             .elseif (wParam == VK_RIGHT) ;right arrow
                 mov player2.playerObj.speed.x, PLAYER_SPEED
                 mov player2.stopped, 0
-            .elseif (wParam == 17) ;      ;RCTRL
+            .elseif (wParam == 193) ;      ;
                 .if player2CanDash == 1
                     mov player2DashClick, 1     ; means the player CAN and WANTS TO dash                
                 .endif
+            .elseif (wParam== 191)  ;     .
+                .if arrow2.playerOwns != 0              ;if has arrow, can shoot
+                    mov arrow2.remainingDistance, 800 
+                    mov arrow2.playerOwns, 0
+                    
+                    mov ah, player2.direction
+                    mov arrow2.direction, ah
+                    
+                    mov arrow2.onGround, FALSE
+                    mov eax, player2.playerObj.pos.x
+                    mov arrow2.arrowObj.pos.x, eax
+
+                    mov eax, player2.playerObj.pos.y
+                    mov arrow2.arrowObj.pos.y, eax  
+                .endif
             .endif
 
-            ;invoke wsprintf, ADDR buffer, ADDR test_header_format, wParam
-            ;invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL 
+           ; invoke wsprintf, ADDR buffer, ADDR test_header_format, wParam
+           ; invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL 
         ;.endif
 
     .ELSE   

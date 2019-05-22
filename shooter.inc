@@ -142,7 +142,7 @@ arrow ends
     player2 player <<<1120,350>, <0,0>>, 0, 0, 2, 0, 0, D_LEFT, 0, 0>
 
     arrow1 arrow <<<-50, -50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 1, 8>  
-    arrow2 arrow <<<50, 50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 2, 8>
+    arrow2 arrow <<<-50, -50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 2, 8>
 
     player1CanDash        BYTE 0
     player2CanDash        BYTE 0
