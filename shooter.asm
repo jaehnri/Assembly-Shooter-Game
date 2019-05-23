@@ -43,6 +43,10 @@ start:
 
 loadImages proc                                                 
 
+    ;Loading background bitmap
+    invoke LoadBitmap, hInstance, 169
+    mov h_background, eax
+
     ;Loading Arrow 1's Bitmaps:
 
     invoke LoadBitmap, hInstance, 116
@@ -121,6 +125,17 @@ ret
 isStopped endp
 ;______________________________________________________________________________
 
+;______________________________________________________________________________
+
+paintBackground proc _hdc:HDC, _hMemDC:HDC
+    invoke SelectObject, _hMemDC, h_background
+    invoke BitBlt, _hdc, 0, 0, 1200, 800, _hMemDC, 0, 0, SRCCOPY
+
+    ret
+paintBackground endp
+
+;______________________________________________________________________________
+
 paintPlayers proc _hdc:HDC, _hMemDC:HDC
 
    ;PLAYER 1___________________________________________
@@ -154,7 +169,10 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
         sub eax, PLAYER_HALF_SIZE
         sub ebx, PLAYER_HALF_SIZE
 
-        invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, edx, ecx, SRCCOPY 
+        ;invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, edx, ecx, SRCCOPY 
+        invoke TransparentBlt, _hdc, eax, ebx,\
+            PLAYER_SIZE, PLAYER_SIZE, _hMemDC,\
+            edx, ecx, PLAYER_SIZE, PLAYER_SIZE, 16777215
     ;________________________________________________________________________________
 
 
@@ -190,7 +208,10 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
         sub eax, PLAYER_HALF_SIZE
         sub ebx, PLAYER_HALF_SIZE
 
-        invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, edx, ecx, SRCCOPY 
+        ;invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, edx, ecx, SRCCOPY 
+        invoke TransparentBlt, _hdc, eax, ebx,\
+            PLAYER_SIZE, PLAYER_SIZE, _hMemDC,\
+            edx, ecx, PLAYER_SIZE, PLAYER_SIZE, 16777215
     ;________________________________________________________________________________
     
     ret
@@ -253,6 +274,8 @@ updateScreen proc
     ;    50, 50, hMemDC,\    
     ;    0, 0, 50, 50, 16777215
 
+    invoke paintBackground, hDC, hMemDC
+
     invoke paintPlayers, hDC, hMemDC
     invoke paintArrows, hDC, hMemDC
 
@@ -262,6 +285,22 @@ updateScreen proc
 
     ret
 updateScreen endp
+
+;______________________________________________________________________________
+
+paintThread proc p:DWORD
+    .while !over
+        invoke Sleep, 25 ; 60 FPS
+
+        ;invoke updateScreen
+
+        ;invoke InvalidateRect, hWnd, NULL, TRUE
+
+    .endw
+
+    ret
+paintThread endp
+
 ;______________________________________________________________________________
 
 movePlayer proc uses eax addrPlayer:dword               ; updates a gameObject position based on its speed
@@ -787,8 +826,12 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         invoke loadImages
 
         mov eax, offset gameManager 
-        invoke CreateThread, NULL, NULL, eax, 0, 0, addr threadID 
+        invoke CreateThread, NULL, NULL, eax, 0, 0, addr thread1ID 
         invoke CloseHandle, eax 
+
+        mov eax, offset paintThread
+        invoke CreateThread, NULL, NULL, eax, 0, 0, addr thread2ID
+        invoke CloseHandle, eax
     ;____________________________________________________________________________
 
     .ELSEIF uMsg == WM_DESTROY                                        ; if the user closes our window 
@@ -918,7 +961,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             mov direction, 3
 
         .elseif (wParam == 46h) ; f
-            .if player1CanDash == 1
+            .if player1CanDash == 1 && player1.stopped == 0
                 mov player1DashClick, 1                              ; means the player CAN and WANTS TO dash
             .endif
         .elseif (wParam == 47h) ; g
@@ -971,7 +1014,7 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             mov keydown, TRUE
 
         .elseif (wParam == 193) ;      ;
-            .if player2CanDash == 1
+            .if player2CanDash == 1 && player2.stopped == 0
                 mov player2DashClick, 1     ; means the player CAN and WANTS TO dash                
             .endif
         .elseif (wParam== 191)  ;     .

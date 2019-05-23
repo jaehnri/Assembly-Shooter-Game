@@ -1,4 +1,5 @@
 include \masm32\include\masm32rt.inc
+include \masm32\include\msimg32.inc
 
 ;include \masm32\include\windows.inc 
 ;include \masm32\include\user32.inc 
@@ -8,6 +9,7 @@ include \masm32\include\masm32rt.inc
 includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\user32.lib
 includelib \masm32\lib\gdi32.lib
+includelib C:\masm32\lib\msimg32.lib
 ;includelib C:\masm32\lib\gdi32.lib   ; pode muda depois so fiz isso pra consegui usa em casa
 
 ;include C:\masm32\include\windows.inc
@@ -99,6 +101,9 @@ arrow ends
     ARROW_SIZE_POINT   point <42,20>
     ARROW_HALF_SIZE_P  point <21,10>
 
+    ;Background bitmap:
+    h_background        dd 0
+
     ;Player 1 Bitmaps:
     h_V1_top_left       dd 0
     h_V1_top            dd 0
@@ -158,6 +163,7 @@ arrow ends
 
 .DATA?
     hWnd HWND ?
-    threadID DWORD ?
+    thread1ID DWORD ?
+    thread2ID DWORD ?
 
     
