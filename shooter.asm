@@ -301,32 +301,32 @@ assume eax:ptr player
     mov [eax].dashsequence, 6
 
     .if [eax].direction == D_TOP_LEFT
-        add [eax].playerObj.speed.x, -DASH_SPEED
-        add [eax].playerObj.speed.y, -DASH_SPEED
+        mov [eax].playerObj.speed.x, -DASH_SPEED
+        mov [eax].playerObj.speed.y, -DASH_SPEED
 
     .elseif [eax].direction == D_TOP
-        add [eax].playerObj.speed.y, -DASH_SPEED
+        mov [eax].playerObj.speed.y, -DASH_SPEED
 
     .elseif [eax].direction == D_TOP_RIGHT
-        add [eax].playerObj.speed.x,  DASH_SPEED
-        add [eax].playerObj.speed.y, -DASH_SPEED
+        mov [eax].playerObj.speed.x,  DASH_SPEED
+        mov [eax].playerObj.speed.y, -DASH_SPEED
 
     .elseif [eax].direction == D_RIGHT
-        add [eax].playerObj.speed.x,  DASH_SPEED
+        mov [eax].playerObj.speed.x,  DASH_SPEED
 
     .elseif [eax].direction == D_DOWN_RIGHT
-        add [eax].playerObj.speed.x,  DASH_SPEED
-        add [eax].playerObj.speed.y,  DASH_SPEED
+        mov [eax].playerObj.speed.x,  DASH_SPEED
+        mov [eax].playerObj.speed.y,  DASH_SPEED
 
     .elseif [eax].direction == D_DOWN
-        add [eax].playerObj.speed.y,  DASH_SPEED
+        mov [eax].playerObj.speed.y,  DASH_SPEED
 
     .elseif [eax].direction == D_DOWN_LEFT
-        add [eax].playerObj.speed.x, -DASH_SPEED
-        add [eax].playerObj.speed.y,  DASH_SPEED
+        mov [eax].playerObj.speed.x, -DASH_SPEED
+        mov [eax].playerObj.speed.y,  DASH_SPEED
 
     .elseif [eax].direction == D_LEFT
-        add [eax].playerObj.speed.x,  -DASH_SPEED
+        mov [eax].playerObj.speed.x,  -DASH_SPEED
     .endif
 
     mov [eax].cooldownDash, 0
@@ -584,8 +584,19 @@ gameManager proc p:dword
                     .if player1.dashsequence == 12
                         ; dash over
                         mov player1.dashsequence, 0
-                        mov player1.playerObj.speed.x, 0
-                        mov player1.playerObj.speed.y, 0
+                        .if player1.playerObj.speed.x == DASH_SPEED
+                            mov player1.playerObj.speed.x, PLAYER_SPEED
+                        .elseif player1.playerObj.speed.x == -DASH_SPEED
+                            mov player1.playerObj.speed.x, -PLAYER_SPEED
+                        .endif
+                        .if player1.playerObj.speed.y == DASH_SPEED
+                            mov player1.playerObj.speed.y, PLAYER_SPEED
+                        .elseif player1.playerObj.speed.y == -DASH_SPEED
+                            mov player1.playerObj.speed.y, -PLAYER_SPEED
+                        .endif
+
+                        ;mov player1.playerObj.speed.x, 0
+                        ;mov player1.playerObj.speed.y, 0
                     .endif
                     mov player1.dashanimationCD, 0
                 .endif
@@ -615,8 +626,19 @@ gameManager proc p:dword
                     .if player2.dashsequence == 12
                         ; dash over
                         mov player2.dashsequence, 0
-                        mov player2.playerObj.speed.x, 0
-                        mov player2.playerObj.speed.y, 0
+                        .if player2.playerObj.speed.x == DASH_SPEED
+                            mov player2.playerObj.speed.x, PLAYER_SPEED
+                        .elseif player2.playerObj.speed.x == -DASH_SPEED
+                            mov player2.playerObj.speed.x, -PLAYER_SPEED
+                        .endif
+                        .if player2.playerObj.speed.y == DASH_SPEED
+                            mov player2.playerObj.speed.y, PLAYER_SPEED
+                        .elseif player2.playerObj.speed.y == -DASH_SPEED
+                            mov player2.playerObj.speed.y, -PLAYER_SPEED
+                        .endif
+
+                        ;mov player2.playerObj.speed.x, 0
+                        ;mov player2.playerObj.speed.y, 0
                     .endif
                     mov player2.dashanimationCD, 0
                 .endif
@@ -639,6 +661,67 @@ gameManager proc p:dword
         .endw
     ret
 gameManager endp
+
+;_____________________________________________________________________________________________________________________________
+
+
+changePlayerSpeed proc uses eax addrPlayer : DWORD, direction : BYTE, keydown : BYTE
+    assume eax: ptr player
+    mov eax, addrPlayer
+
+    .if keydown == FALSE
+        .if direction == 0 ;w
+            .if [eax].playerObj.speed.y > 7fh
+                mov [eax].playerObj.speed.y, 0 
+            .endif
+        .elseif direction == 1 ;a
+            .if [eax].playerObj.speed.x > 7fh
+                mov [eax].playerObj.speed.x, 0 
+            .endif
+        .elseif direction == 2 ;s
+            .if [eax].playerObj.speed.y < 80h
+                mov [eax].playerObj.speed.y, 0 
+            .endif
+        .elseif direction == 3 ;d
+            .if [eax].playerObj.speed.x < 80h
+                mov [eax].playerObj.speed.x, 0 
+            .endif
+        .endif
+    .else
+        .if [eax].dashsequence == 0
+            .if direction == 0 ; w
+                mov [eax].playerObj.speed.y, -PLAYER_SPEED
+                mov [eax].stopped, 0
+            .elseif direction == 1 ; s
+                mov [eax].playerObj.speed.y, PLAYER_SPEED
+                mov [eax].stopped, 0
+            .elseif direction == 2 ; a
+                mov [eax].playerObj.speed.x, -PLAYER_SPEED
+                mov [eax].stopped, 0
+            .elseif direction == 3 ; d
+                mov [eax].playerObj.speed.x, PLAYER_SPEED
+                mov [eax].stopped, 0
+            .endif
+        .else
+            .if direction == 0 ; w
+                mov [eax].playerObj.speed.y, -DASH_SPEED
+                mov [eax].stopped, 0
+            .elseif direction == 1 ; s
+                mov [eax].playerObj.speed.y, DASH_SPEED
+                mov [eax].stopped, 0
+            .elseif direction == 2 ; a
+                mov [eax].playerObj.speed.x, -DASH_SPEED
+                mov [eax].stopped, 0
+            .elseif direction == 3 ; d
+                mov [eax].playerObj.speed.x, DASH_SPEED
+                mov [eax].stopped, 0
+            .endif
+        .endif
+    .endif
+
+    assume ecx: nothing
+    ret
+changePlayerSpeed endp
 
 
 
@@ -694,6 +777,11 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
 WinMain endp
 
 WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM 
+    LOCAL direction : BYTE
+    LOCAL keydown   : BYTE
+    mov direction, -1
+    mov keydown, -1
+
 
     .IF uMsg == WM_CREATE
         invoke loadImages
@@ -721,22 +809,41 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         ; TODO: FAZER VARIAVEL QUE GUARDA SE O KEYUP FOI APERTADO OU NAO
 
         .if (wParam == 77h || wParam == 57h) ;w
-            .if (player1.playerObj.speed.y > 7fh) 
-                mov player1.playerObj.speed.y, 0 
-            .endif
+            ;.if (player1.playerObj.speed.y > 7fh) 
+            ;    mov player1.playerObj.speed.y, 0 
+            ;.endif
+            mov keydown, FALSE
+            mov direction, 0
+
         .elseif (wParam == 61h || wParam == 41h) ;a
-            .if (player1.playerObj.speed.x > 7fh) 
-                mov player1.playerObj.speed.x, 0 
-            .endif
+            ;.if (player1.playerObj.speed.x > 7fh) 
+            ;    mov player1.playerObj.speed.x, 0 
+            ;.endif
+            mov keydown, FALSE
+            mov direction, 1
+
         .elseif (wParam == 73h || wParam == 53h) ;s
-            .if (player1.playerObj.speed.y < 80h) 
-                mov player1.playerObj.speed.y, 0 
-            .endif
+            ;.if (player1.playerObj.speed.y < 80h) 
+            ;    mov player1.playerObj.speed.y, 0 
+            ;.endif
+            mov keydown, FALSE
+            mov direction, 2
+
         .elseif (wParam == 64h || wParam == 44h) ;d
-            .if (player1.playerObj.speed.x < 80h) 
-                mov player1.playerObj.speed.x, 0 
-            .endif
+            ;.if (player1.playerObj.speed.x < 80h) 
+            ;    mov player1.playerObj.speed.x, 0 
+            ;.endif
+            mov keydown, FALSE
+            mov direction, 3
+
         .endif
+
+        .if direction != -1
+            invoke changePlayerSpeed, ADDR player1, direction, keydown
+            mov direction, -1
+            mov keydown, -1
+        .endif
+
     ;.endif
 ;________________________________________________________________________________
 ;________________________________________________________________________________
@@ -744,21 +851,39 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     ; PLAYER 2 __________________________________________________________________
     ;.if player2.dashsequence == 0
         .if (wParam == VK_UP) ;up arrow
-            .if (player2.playerObj.speed.y > 7fh) 
-                mov player2.playerObj.speed.y, 0
-            .endif
-        .elseif (wParam == VK_DOWN) ;down arrow
-            .if (player2.playerObj.speed.y < 80h) 
-                mov player2.playerObj.speed.y, 0 
-            .endif
-        .elseif (wParam == VK_LEFT) ;left arrow
-            .if (player2.playerObj.speed.x > 7fh) 
-                mov player2.playerObj.speed.x, 0 
-            .endif
+            ;.if (player2.playerObj.speed.y > 7fh) 
+            ;    mov player2.playerObj.speed.y, 0
+            ;.endif
+            mov keydown, FALSE
+            mov direction, 0
+
+        .elseif (wParam == VK_LEFT) ;down arrow
+            ;.if (player2.playerObj.speed.y < 80h) 
+            ;    mov player2.playerObj.speed.y, 0 
+            ;.endif
+            mov keydown, FALSE
+            mov direction, 1
+
+        .elseif (wParam == VK_DOWN) ;left arrow
+            ;.if (player2.playerObj.speed.x > 7fh) 
+            ;    mov player2.playerObj.speed.x, 0 
+            ;.endif
+            mov keydown, FALSE
+            mov direction, 2
+
         .elseif (wParam == VK_RIGHT) ;right arrow
-            .if (player2.playerObj.speed.x < 80h)
-                mov player2.playerObj.speed.x, 0 
-            .endif
+            ;.if (player2.playerObj.speed.x < 80h)
+            ;    mov player2.playerObj.speed.x, 0 
+            ;.endif
+            mov keydown, FALSE
+            mov direction, 3
+
+        .endif
+
+        .if direction != -1
+            invoke changePlayerSpeed, ADDR player2, direction, keydown
+            mov direction, -1
+            mov keydown, -1
         .endif
     ;.endif
 ;________________________________________________________________________________
@@ -767,78 +892,114 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
     .ELSEIF uMsg == WM_KEYDOWN
 
     ;___________________PLAYER 1 MOVEMENT KEYS____________________________________
-        ;.if player1.dashsequence == 0
-            .if (wParam == 57h) ; w
-                mov player1.playerObj.speed.y, -PLAYER_SPEED
-                mov player1.stopped, 0
-            .elseif (wParam == 53h) ; s
-                mov player1.playerObj.speed.y, PLAYER_SPEED
-                mov player1.stopped, 0
-            .elseif (wParam == 41h) ; a
-                mov player1.playerObj.speed.x, -PLAYER_SPEED
-                mov player1.stopped, 0
-            .elseif (wParam == 44h) ; d
-                mov player1.playerObj.speed.x, PLAYER_SPEED
-                mov player1.stopped, 0
-            .elseif (wParam == 46h) ; f
-                .if player1CanDash == 1
-                    mov player1DashClick, 1                              ; means the player CAN and WANTS TO dash
-                .endif
-            .elseif (wParam == 47h) ; g
-                .if arrow1.playerOwns != 0              ;if has arrow, can shoot
-                    mov arrow1.remainingDistance, 800 
-                    mov arrow1.playerOwns, 0
-                    
-                    mov ah, player1.direction
-                    mov arrow1.direction, ah
-                    
-                    mov arrow1.onGround, FALSE
-                    mov eax, player1.playerObj.pos.x
-                    mov arrow1.arrowObj.pos.x, eax
+    ;.if player1.dashsequence == 0
+        .if (wParam == 57h) ; w
+            ;mov player1.playerObj.speed.y, -PLAYER_SPEED
+            ;mov player1.stopped, 0
+            mov keydown, TRUE
+            mov direction, 0
 
-                    mov eax, player1.playerObj.pos.y
-                    mov arrow1.arrowObj.pos.y, eax  
-                .endif
+        .elseif (wParam == 53h) ; s
+            ;mov player1.playerObj.speed.y, PLAYER_SPEED
+            ;mov player1.stopped, 0
+            mov keydown, TRUE
+            mov direction, 1
+
+        .elseif (wParam == 41h) ; a
+            ;mov player1.playerObj.speed.x, -PLAYER_SPEED
+            ;mov player1.stopped, 0
+            mov keydown, TRUE
+            mov direction, 2
+
+        .elseif (wParam == 44h) ; d
+            ;mov player1.playerObj.speed.x, PLAYER_SPEED
+            ;mov player1.stopped, 0
+            mov keydown, TRUE
+            mov direction, 3
+
+        .elseif (wParam == 46h) ; f
+            .if player1CanDash == 1
+                mov player1DashClick, 1                              ; means the player CAN and WANTS TO dash
             .endif
-        ;.endif
+        .elseif (wParam == 47h) ; g
+            .if arrow1.playerOwns != 0              ;if has arrow, can shoot
+                mov arrow1.remainingDistance, 800 
+                mov arrow1.playerOwns, 0
+                
+                mov ah, player1.direction
+                mov arrow1.direction, ah
+                
+                mov arrow1.onGround, FALSE
+                mov eax, player1.playerObj.pos.x
+                mov arrow1.arrowObj.pos.x, eax
 
-        ;.if player2.dashsequence == 0
-            .if (wParam == VK_UP) ;up arrow
-                mov player2.playerObj.speed.y, -PLAYER_SPEED
-                mov player2.stopped, 0
-            .elseif (wParam == VK_DOWN) ;down arrow 
-                mov player2.playerObj.speed.y, PLAYER_SPEED
-                mov player2.stopped, 0
-            .elseif (wParam == VK_LEFT) ;left arrow
-                mov player2.playerObj.speed.x, -PLAYER_SPEED
-                mov player2.stopped, 0
-            .elseif (wParam == VK_RIGHT) ;right arrow
-                mov player2.playerObj.speed.x, PLAYER_SPEED
-                mov player2.stopped, 0
-            .elseif (wParam == 193) ;      ;
-                .if player2CanDash == 1
-                    mov player2DashClick, 1     ; means the player CAN and WANTS TO dash                
-                .endif
-            .elseif (wParam== 191)  ;     .
-                .if arrow2.playerOwns != 0              ;if has arrow, can shoot
-                    mov arrow2.remainingDistance, 800 
-                    mov arrow2.playerOwns, 0
-                    
-                    mov ah, player2.direction
-                    mov arrow2.direction, ah
-                    
-                    mov arrow2.onGround, FALSE
-                    mov eax, player2.playerObj.pos.x
-                    mov arrow2.arrowObj.pos.x, eax
-
-                    mov eax, player2.playerObj.pos.y
-                    mov arrow2.arrowObj.pos.y, eax  
-                .endif
+                mov eax, player1.playerObj.pos.y
+                mov arrow1.arrowObj.pos.y, eax  
             .endif
+        .endif
 
-           ; invoke wsprintf, ADDR buffer, ADDR test_header_format, wParam
-           ; invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL 
-        ;.endif
+        .if direction != -1
+            invoke changePlayerSpeed, ADDR player1, direction, keydown
+            mov direction, -1
+            mov keydown, -1
+        .endif
+    ;.endif
+
+    ;.if player2.dashsequence == 0
+        .if (wParam == VK_UP) ;up arrow
+            ;mov player2.playerObj.speed.y, -PLAYER_SPEED
+            ;mov player2.stopped, 0
+            mov direction, 0
+            mov keydown, TRUE
+
+        .elseif (wParam == VK_DOWN) ;down arrow 
+            ;mov player2.playerObj.speed.y, PLAYER_SPEED
+            ;mov player2.stopped, 0
+            mov direction, 1
+            mov keydown, TRUE
+
+        .elseif (wParam == VK_LEFT) ;left arrow
+            ;mov player2.playerObj.speed.x, -PLAYER_SPEED
+            ;mov player2.stopped, 0
+            mov direction, 2
+            mov keydown, TRUE
+
+        .elseif (wParam == VK_RIGHT) ;right arrow
+            ;mov player2.playerObj.speed.x, PLAYER_SPEED
+            ;mov player2.stopped, 0
+            mov direction, 3
+            mov keydown, TRUE
+
+        .elseif (wParam == 193) ;      ;
+            .if player2CanDash == 1
+                mov player2DashClick, 1     ; means the player CAN and WANTS TO dash                
+            .endif
+        .elseif (wParam== 191)  ;     .
+            .if arrow2.playerOwns != 0              ;if has arrow, can shoot
+                mov arrow2.remainingDistance, 800 
+                mov arrow2.playerOwns, 0
+                
+                mov ah, player2.direction
+                mov arrow2.direction, ah
+                
+                mov arrow2.onGround, FALSE
+                mov eax, player2.playerObj.pos.x
+                mov arrow2.arrowObj.pos.x, eax
+
+                mov eax, player2.playerObj.pos.y
+                mov arrow2.arrowObj.pos.y, eax  
+            .endif
+        .endif
+
+        .if direction != -1
+            invoke changePlayerSpeed, ADDR player2, direction, keydown
+            mov direction, -1
+            mov keydown, -1
+        .endif
+
+        ; invoke wsprintf, ADDR buffer, ADDR test_header_format, wParam
+        ; invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL 
+    ;.endif
 
     .ELSE   
 
