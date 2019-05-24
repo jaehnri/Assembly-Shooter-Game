@@ -290,11 +290,11 @@ updateScreen endp
 
 paintThread proc p:DWORD
     .while !over
-        invoke Sleep, 25 ; 60 FPS
+        invoke Sleep, 17 ; 60 FPS
 
         ;invoke updateScreen
 
-        ;invoke InvalidateRect, hWnd, NULL, TRUE
+        invoke InvalidateRect, hWnd, NULL, TRUE
 
     .endw
 
@@ -524,6 +524,8 @@ fixArrowCoordinates endp
 
 
 gameManager proc p:dword
+        LOCAL area:RECT
+
         .while !over
             invoke Sleep, 30
 
@@ -696,7 +698,7 @@ gameManager proc p:dword
             invoke fixCoordinates, addr player1
             invoke fixCoordinates, addr player2
 
-            invoke InvalidateRect, hWnd, NULL, TRUE
+            ;invoke InvalidateRect, hWnd, NULL, TRUE
         .endw
     ret
 gameManager endp
@@ -780,7 +782,7 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
     mov   wc.cbWndExtra,NULL 
     push  hInstance 
     pop   wc.hInstance 
-    mov   wc.hbrBackground, COLOR_WINDOW + 1; black window
+    mov   wc.hbrBackground, NULL ; no background
     mov   wc.lpszMenuName,NULL 
     mov   wc.lpszClassName ,OFFSET ClassName 
     invoke LoadIcon, NULL, IDI_APPLICATION 
