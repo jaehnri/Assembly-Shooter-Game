@@ -776,7 +776,7 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
     LOCAL msg:MSG 
 
     mov   wc.cbSize,SIZEOF WNDCLASSEX ; fill values in members of wc 
-    mov   wc.style, CS_HREDRAW or CS_VREDRAW 
+    mov   wc.style, CS_BYTEALIGNWINDOW
     mov   wc.lpfnWndProc, OFFSET WndProc 
     mov   wc.cbClsExtra,NULL 
     mov   wc.cbWndExtra,NULL 
