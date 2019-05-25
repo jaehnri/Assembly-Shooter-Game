@@ -28,10 +28,10 @@ CommandLine LPSTR ?
 start: 
 
 
-    invoke LoadLibrary,addr Libname         ; splash screen reasons 
-        .if eax!=NULL 
-            invoke FreeLibrary,eax 
-        .endif
+ ;   invoke LoadLibrary,addr Libname         ; splash screen reasons 
+ ;       .if eax!=NULL 
+ ;           invoke FreeLibrary,eax 
+ ;       .endif
     invoke GetModuleHandle, NULL            ; get the instance handle of our program. 
                                             ; Under Win32, hmodule==hinstance mov hInstance,eax 
     mov hInstance,eax 
