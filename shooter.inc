@@ -9,7 +9,7 @@ include \masm32\include\msimg32.inc
 includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\user32.lib
 includelib \masm32\lib\gdi32.lib
-includelib C:\masm32\lib\msimg32.lib
+includelib \masm32\lib\msimg32.lib
 ;includelib C:\masm32\lib\gdi32.lib   ; pode muda depois so fiz isso pra consegui usa em casa
 
 ;include C:\masm32\include\windows.inc
@@ -66,8 +66,8 @@ arrow ends
 
 
 .CONST
-    WINDOW_SIZE_X EQU 1180
-    WINDOW_SIZE_Y EQU 650
+    WINDOW_SIZE_X EQU 1200
+    WINDOW_SIZE_Y EQU 800
 
     D_RIGHT       EQU 0 
     D_TOP         EQU 1  
