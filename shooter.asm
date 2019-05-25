@@ -18,7 +18,6 @@ AppName db "ATARI SHOOTER",0
 
 
 
-
 .DATA?
 hInstance HINSTANCE ?        ; Instance handle do programa
 CommandLine LPSTR ? 
@@ -27,6 +26,12 @@ CommandLine LPSTR ?
 
 .CODE                ; Here begins our code 
 start: 
+
+
+    invoke LoadLibrary,addr Libname         ; splash screen reasons 
+        .if eax!=NULL 
+            invoke FreeLibrary,eax 
+        .endif
     invoke GetModuleHandle, NULL            ; get the instance handle of our program. 
                                             ; Under Win32, hmodule==hinstance mov hInstance,eax 
     mov hInstance,eax 
@@ -272,8 +277,11 @@ updateScreen proc
     ;invoke SelectObject, hMemDC, h_V1_top_left
     ;invoke TransparentBlt, hDC, 0, 0,\
     ;    50, 50, hMemDC,\    
+ 
     ;    0, 0, 50, 50, 16777215
-
+;if gamestate == 0
+;    invoke paintSplashScreen
+;elseif gamestate == 1
     invoke paintBackground, hDC, hMemDC
 
     invoke paintPlayers, hDC, hMemDC
@@ -281,7 +289,7 @@ updateScreen proc
 
     invoke DeleteDC, hMemDC
     invoke EndPaint, hWnd, ADDR paintstruct
-
+;endif
 
     ret
 updateScreen endp
@@ -770,6 +778,7 @@ changePlayerSpeed endp
 
 ; _ WINMAIN __________________________________________________________________________________________________________________
 WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD 
+    LOCAL clientRect:RECT
     LOCAL wc:WNDCLASSEX                                               ; create local variables on stack 
     LOCAL msg:MSG 
 
@@ -778,29 +787,40 @@ WinMain proc hInst:HINSTANCE, hPrevInst:HINSTANCE, CmdLine:LPSTR, CmdShow:DWORD
     mov   wc.lpfnWndProc, OFFSET WndProc 
     mov   wc.cbClsExtra,NULL 
     mov   wc.cbWndExtra,NULL 
+
     push  hInstance 
     pop   wc.hInstance 
+
     mov   wc.hbrBackground, COLOR_WINDOW + 1; black window
     mov   wc.lpszMenuName,NULL 
     mov   wc.lpszClassName ,OFFSET ClassName 
+
     invoke LoadIcon, NULL, IDI_APPLICATION 
     mov   wc.hIcon,eax 
     mov   wc.hIconSm,eax 
+
     invoke LoadCursor, NULL,IDC_ARROW 
     mov   wc.hCursor, eax 
+
     invoke RegisterClassEx, addr wc ; register our window class 
-    invoke CreateWindowEx,NULL,\ 
-                ADDR ClassName,\ 
-                ADDR AppName,\ 
-                WS_OVERLAPPEDWINDOW,\ 
-                CW_USEDEFAULT,\ 
-                CW_USEDEFAULT,\ 
-                CW_USEDEFAULT,\ 
-                CW_USEDEFAULT,\ 
-                NULL,\ 
-                NULL,\ 
-                hInst,\ 
-                NULL 
+
+    mov clientRect.left, 0
+    mov clientRect.top, 0
+    mov clientRect.right, WINDOW_SIZE_X
+    mov clientRect.bottom, WINDOW_SIZE_Y
+
+    invoke AdjustWindowRect, addr clientRect, WS_CAPTION, FALSE
+
+    mov eax, clientRect.right
+    sub eax, clientRect.left
+    mov ebx, clientRect.bottom
+    sub ebx, clientRect.top
+
+    invoke CreateWindowEx, NULL, addr ClassName, addr AppName,\ 
+        WS_OVERLAPPED or WS_SYSMENU or WS_MINIMIZEBOX,\ 
+        CW_USEDEFAULT, CW_USEDEFAULT,\
+        eax, ebx, NULL, NULL, hInst, NULL 
+        
     mov   hWnd,eax 
     invoke ShowWindow, hWnd, CmdShow                                  ; display our window on desktop 
     invoke UpdateWindow, hWnd                                         ; refresh the client area
@@ -844,6 +864,10 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         ;mov eax, offset gameManager
         ;invoke CreateThread, NULL, NULL, eax, 0, 0, addr threadID 
         ;invoke CloseHandle, eax
+        .if (wParam == 13) ; [ENTER]
+            invoke wsprintf, ADDR buffer, ADDR test_header_format, wParam
+            invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL 
+        .endif
 
     .ELSEIF uMsg == WM_KEYUP
     ; PLAYER 1 ____________________________________________________________________
@@ -1040,8 +1064,8 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             mov keydown, -1
         .endif
 
-        ; invoke wsprintf, ADDR buffer, ADDR test_header_format, wParam
-        ; invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL 
+         ;invoke wsprintf, ADDR buffer, ADDR test_header_format, wParam
+         ;invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL 
     ;.endif
 
     .ELSE   
