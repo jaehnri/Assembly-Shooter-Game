@@ -52,6 +52,12 @@ loadImages proc
     invoke LoadBitmap, hInstance, 169
     mov h_background, eax
 
+    invoke LoadBitmap, hInstance, 170
+    mov h_enterprise, eax
+
+    invoke LoadBitmap, hInstance, 171
+    mov h_menu, eax
+
     ;Loading Arrow 1's Bitmaps:
 
     invoke LoadBitmap, hInstance, 116
@@ -133,8 +139,21 @@ isStopped endp
 ;______________________________________________________________________________
 
 paintBackground proc _hdc:HDC, _hMemDC:HDC
+
+.if GAMESTATE == 0
+    invoke SelectObject, _hMemDC, h_enterprise
+    invoke BitBlt, _hdc, 0, 0, 1200, 800, _hMemDC, 0, 0, SRCCOPY
+.endif
+
+.if GAMESTATE == 1
+    invoke SelectObject, _hMemDC, h_menu
+    invoke BitBlt, _hdc, 0, 0, 1200, 800, _hMemDC, 0, 0, SRCCOPY
+.endif
+
+.if GAMESTATE == 2
     invoke SelectObject, _hMemDC, h_background
     invoke BitBlt, _hdc, 0, 0, 1200, 800, _hMemDC, 0, 0, SRCCOPY
+.endif
 
     ret
 paintBackground endp
@@ -533,8 +552,17 @@ fixArrowCoordinates endp
 
 gameManager proc p:dword
         LOCAL area:RECT
+        
+        .if GAMESTATE == 0
+            invoke Sleep, 3000
+            inc GAMESTATE
+        .endif
 
-        .while !over
+        .while GAMESTATE == 1
+            invoke Sleep, 30
+        .endw
+
+        .while GAMESTATE == 2
             invoke Sleep, 30
 
             ;invoke isColliding, player1.playerObj.pos, player2.playerObj.pos, PLAYER_SIZE_POS_S, PLAYER_SIZE_POS_S
@@ -707,8 +735,9 @@ gameManager proc p:dword
             invoke fixCoordinates, addr player2
 
             ;invoke InvalidateRect, hWnd, NULL, TRUE
+            
         .endw
-    ret
+ret
 gameManager endp
 
 ;_____________________________________________________________________________________________________________________________
@@ -866,8 +895,9 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         ;invoke CreateThread, NULL, NULL, eax, 0, 0, addr threadID 
         ;invoke CloseHandle, eax
         .if (wParam == 13) ; [ENTER]
-            invoke wsprintf, ADDR buffer, ADDR test_header_format, wParam
-            invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL 
+            .if GAMESTATE == 1
+                inc GAMESTATE
+            .endif
         .endif
 
     .ELSEIF uMsg == WM_KEYUP
@@ -1038,11 +1068,11 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
             mov direction, 3
             mov keydown, TRUE
 
-        .elseif (wParam == 193) ;      ;
+        .elseif (wParam == 80) ;    P
             .if player2CanDash == 1 && player2.stopped == 0
                 mov player2DashClick, 1     ; means the player CAN and WANTS TO dash                
             .endif
-        .elseif (wParam== 191)  ;     .
+        .elseif (wParam== 79)  ;    O
             .if arrow2.playerOwns != 0              ;if has arrow, can shoot
                 mov arrow2.remainingDistance, 800 
                 mov arrow2.playerOwns, 0

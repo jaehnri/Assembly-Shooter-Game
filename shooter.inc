@@ -103,6 +103,8 @@ arrow ends
 
     ;Background bitmap:
     h_background        dd 0
+    h_enterprise        dd 0
+    h_menu              dd 0
 
     ;Player 1 Bitmaps:
     h_V1_top_left       dd 0
@@ -160,6 +162,7 @@ arrow ends
     
     RIGHTARROW            BYTE 0
     
+    GAMESTATE             BYTE 0
 
 .DATA?
     hWnd HWND ?
