@@ -8,6 +8,6 @@ F to roll,
 G to shoot.
 
 Use Arrows to move Player 2,
-RSHIFT to roll,
-?/° to shoot.
+O to roll,
+P to shoot.
 
