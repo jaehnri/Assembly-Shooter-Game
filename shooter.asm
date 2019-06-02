@@ -746,12 +746,18 @@ gameOver proc
     mov player2.dashsequence, 0
 
     mov arrow1.onGround, 1
+    mov arrow1.remainingDistance, 0
+    mov arrow1.arrowObj.speed.x, 0
+    mov arrow1.arrowObj.speed.y, 0
     mov arrow1.arrowObj.pos.x, -100
     mov arrow1.arrowObj.pos.y, -100
     mov arrow1.playerOwns, 1
 
 
     mov arrow2.onGround, 1
+    mov arrow2.remainingDistance, 0
+    mov arrow2.arrowObj.speed.x, 0
+    mov arrow2.arrowObj.speed.y, 0
     mov arrow2.arrowObj.pos.x, -100
     mov arrow2.arrowObj.pos.y, -100
     mov arrow2.playerOwns, 1
@@ -790,6 +796,7 @@ gameManager proc p:dword
                 .if player2.life == 0
                     invoke gameOver
                     mov GAMESTATE, 3 ; player 1 won
+                    .continue
                 .endif
             .endif
 
@@ -811,6 +818,7 @@ gameManager proc p:dword
                 .if player1.life == 0
                     invoke gameOver
                     mov GAMESTATE, 4 ; player 2 won
+                    .continue
                 .endif
             .endif
 
