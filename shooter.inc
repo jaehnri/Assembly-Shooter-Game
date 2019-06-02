@@ -45,7 +45,7 @@ player struct
     playerObj       gameObject <>
     stopped               BYTE 0
     cooldownDash          BYTE 0
-    life                  BYTE 2
+    life                  BYTE 4
     direction             BYTE 0
     walkanimationCD       BYTE 0 ; cooldown
     walksequence          BYTE 0
@@ -84,6 +84,8 @@ arrow ends
     PLAYER_SIZE      EQU 48
     PLAYER_HALF_SIZE EQU PLAYER_SIZE / 2
 
+    HEART_SIZE    EQU 42
+
     ;PLAYER2_SIZE     EQU 48
     ;PLAYER2_HALF_SIZE EQU PLAYER2_SIZE / 2
 
@@ -97,46 +99,47 @@ arrow ends
     DASH_SPEED    EQU 16
 
 .DATA
+    paintstruct        PAINTSTRUCT <>
+
     PLAYER_SIZE_POINT  point <46,46>
-    ARROW_SIZE_POINT   point <42,20>
-    ARROW_HALF_SIZE_P  point <21,10>
+    ARROW_SIZE_POINT   point <42,42>
+    ARROW_HALF_SIZE_P  point <21,21>
 
     ;Background bitmap:
     h_background        dd 0
     h_enterprise        dd 0
     h_menu              dd 0
 
-    ;Player 1 Bitmaps:
-    h_V1_top_left       dd 0
-    h_V1_top            dd 0
-    h_V1_top_right      dd 0
-    h_V1_right          dd 0
-    h_V1_down_right     dd 0
-    h_V1_down           dd 0
-    h_V1_down_left      dd 0
-    h_V1_left           dd 0
-
-    ;Player 2 Bitmaps:
-    h_V2_top_left       dd 0
-    h_V2_top            dd 0
-    h_V2_top_right      dd 0
-    h_V2_right          dd 0
-    h_V2_down_right     dd 0
-    h_V2_down           dd 0
-    h_V2_down_left      dd 0
-    h_V2_left           dd 0
-    
-    ;p2_right1         dd 0
-    ;p2_right2         dd 0
-    ;p2_right3         dd 0
-    ;p2_right4         dd 0
-    p2_spritesheet    dd 0
-    
+    ; Player 1 spritesheet
     p1_spritesheet    dd 0
+    ; Player 2 spritesheet
+    p2_spritesheet    dd 0
 
     ;Arrow 1 Bitmaps:
-    A1_left             dd 0
-    A1_onGround         dd 0
+    A1_top_left       dd 0
+    A1_top            dd 0
+    A1_top_right      dd 0
+    A1_right          dd 0
+    A1_down_right     dd 0
+    A1_down           dd 0
+    A1_down_left      dd 0
+    A1_left           dd 0
+    A1_ground         dd 0
+
+    ;Arrow 2 Bitmaps:
+    A2_top_left       dd 0
+    A2_top            dd 0
+    A2_top_right      dd 0
+    A2_right          dd 0
+    A2_down_right     dd 0
+    A2_down           dd 0
+    A2_down_left      dd 0
+    A2_left           dd 0
+    A2_ground         dd 0
+
+    ;Heart Bitmaps:
+    HT_heart1         dd 0
+    HT_heart2         dd 0
 
     test_header_format  db  "A: %d",13,10,0
     buffer              db 256 dup(?)
@@ -145,8 +148,8 @@ arrow ends
     over byte 0                                ; control game state (occuring or terminated)
 
     ; Players
-    player1 player <<<100,350>,  <0,0>>, 0, 0, 2, 0, 0, D_RIGHT, 0, 0>  ; dash initialized as 8 because 0 to 7 are directions, so 8 is the same as null 
-    player2 player <<<1120,350>, <0,0>>, 0, 0, 2, 0, 0, D_LEFT, 0, 0>
+    player1 player <<<100,350>,  <0,0>>, 0, 0, 4, D_RIGHT, 0, 0, 0, 0>  ; dash initialized as 8 because 0 to 7 are directions, so 8 is the same as null 
+    player2 player <<<1120,350>, <0,0>>, 0, 0, 4, D_LEFT, 0, 0, 0, 0>
 
     arrow1 arrow <<<-50, -50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 1, 8>  
     arrow2 arrow <<<-50, -50>, <ARROW_SPEED, ARROW_SPEED>>, 0, 1, 0, 2, 8>
