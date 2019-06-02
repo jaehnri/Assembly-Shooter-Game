@@ -178,21 +178,21 @@ isStopped endp
 
 ;______________________________________________________________________________
 
-paintBackground proc _hdc:HDC, _hMemDC:HDC
+paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
 .if GAMESTATE == 0
-    invoke SelectObject, _hMemDC, h_enterprise
-    invoke BitBlt, _hdc, 0, 0, 1200, 800, _hMemDC, 0, 0, SRCCOPY
+    invoke SelectObject, _hMemDC2, h_enterprise
+    invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
 .if GAMESTATE == 1
-    invoke SelectObject, _hMemDC, h_menu
-    invoke BitBlt, _hdc, 0, 0, 1200, 800, _hMemDC, 0, 0, SRCCOPY
+    invoke SelectObject, _hMemDC2, h_menu
+    invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
 .if GAMESTATE == 2
-    invoke SelectObject, _hMemDC, h_background
-    invoke BitBlt, _hdc, 0, 0, 1200, 800, _hMemDC, 0, 0, SRCCOPY
+    invoke SelectObject, _hMemDC2, h_background
+    invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
     ret
@@ -200,25 +200,25 @@ paintBackground endp
 
 ;______________________________________________________________________________
 
-paintHearts proc _hdc:HDC, _hMemDC:HDC
+paintHearts proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
     ; PLAYER 1
-
-    invoke SelectObject, _hMemDC, HT_heart1
+    invoke SelectObject, _hMemDC2, HT_heart1
     mov ebx, 0
     movzx ecx, player1.life
     .while ebx != ecx
         mov eax, HEART_SIZE
         mul ebx
         push ecx
-        invoke TransparentBlt, _hdc, eax, 0,\
-                HEART_SIZE, HEART_SIZE, _hMemDC,\
+        invoke TransparentBlt, _hMemDC, eax, 0,\
+                HEART_SIZE, HEART_SIZE, _hMemDC2,\
                 0, 0, HEART_SIZE, HEART_SIZE, 16777215
+        ;invoke BitBlt, _hdc, eax, 0, HEART_SIZE, HEART_SIZE, _hMemDC, 0, 0, SRCCOPY 
         pop ecx
         inc ebx
     .endw
 
     ; PLAYER 2
-    invoke SelectObject, _hMemDC, HT_heart2
+    invoke SelectObject, _hMemDC2, HT_heart2
     mov ebx, 1
     movzx ecx, player2.life
     inc ecx
@@ -228,22 +228,21 @@ paintHearts proc _hdc:HDC, _hMemDC:HDC
         push ecx
         mov edx, WINDOW_SIZE_X
         sub edx, eax
-        invoke TransparentBlt, _hdc, edx, 0,\
-                HEART_SIZE, HEART_SIZE, _hMemDC,\
+        invoke TransparentBlt, _hMemDC, edx, 0,\
+                HEART_SIZE, HEART_SIZE, _hMemDC2,\
                 0, 0, HEART_SIZE, HEART_SIZE, 16777215
         pop ecx
         inc ebx
     .endw
 
-
     ret
 paintHearts endp
 ;______________________________________________________________________________
 
-paintPlayers proc _hdc:HDC, _hMemDC:HDC
+paintPlayers proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
    ;PLAYER 1___________________________________________
-        invoke SelectObject, _hMemDC, p1_spritesheet
+        invoke SelectObject, _hMemDC2, p1_spritesheet
 
         movsx eax, player1.direction
         mov ebx, PLAYER_SIZE
@@ -274,14 +273,14 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
         sub ebx, PLAYER_HALF_SIZE
 
         ;invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, edx, ecx, SRCCOPY 
-        invoke TransparentBlt, _hdc, eax, ebx,\
-            PLAYER_SIZE, PLAYER_SIZE, _hMemDC,\
+        invoke TransparentBlt, _hMemDC, eax, ebx,\
+            PLAYER_SIZE, PLAYER_SIZE, _hMemDC2,\
             edx, ecx, PLAYER_SIZE, PLAYER_SIZE, 16777215
     ;________________________________________________________________________________
 
    ;PLAYER 2___________________________________________
 
-        invoke SelectObject, _hMemDC, p2_spritesheet
+        invoke SelectObject, _hMemDC2, p2_spritesheet
 
         movsx eax, player2.direction
         mov ebx, PLAYER_SIZE
@@ -312,8 +311,8 @@ paintPlayers proc _hdc:HDC, _hMemDC:HDC
         sub ebx, PLAYER_HALF_SIZE
 
         ;invoke BitBlt, _hdc, eax, ebx, PLAYER_SIZE, PLAYER_SIZE, _hMemDC, edx, ecx, SRCCOPY 
-        invoke TransparentBlt, _hdc, eax, ebx,\
-            PLAYER_SIZE, PLAYER_SIZE, _hMemDC,\
+        invoke TransparentBlt, _hMemDC, eax, ebx,\
+            PLAYER_SIZE, PLAYER_SIZE, _hMemDC2,\
             edx, ecx, PLAYER_SIZE, PLAYER_SIZE, 16777215
     ;________________________________________________________________________________
     
@@ -322,39 +321,39 @@ paintPlayers endp
 
 ;________________________________________________________________________________
 
-paintArrows proc _hdc:HDC, _hMemDC:HDC 
+paintArrows proc _hdc:HDC, _hMemDC:HDC, _hMemDC2
 
     ;________PLAYER 1 PAINTING_____________________________________________________________
 
         .if arrow1.onGround == 1 
             ;invoke wsprintf, ADDR buffer, ADDR test_header_format, 0
             ;invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL
-            invoke SelectObject, _hMemDC, A1_ground
+            invoke SelectObject, _hMemDC2, A1_ground
             ;invoke SelectObject, _hMemDC, A1_left
         .else
             .if arrow1.direction == D_TOP_LEFT
-                invoke SelectObject, _hMemDC, A1_top_left
+                invoke SelectObject, _hMemDC2, A1_top_left
             
             .elseif arrow1.direction == D_TOP
-                invoke SelectObject, _hMemDC, A1_top
+                invoke SelectObject, _hMemDC2, A1_top
 
             .elseif arrow1.direction == D_TOP_RIGHT
-                invoke SelectObject, _hMemDC, A1_top_right 
+                invoke SelectObject, _hMemDC2, A1_top_right 
 
             .elseif arrow1.direction == D_RIGHT
-                invoke SelectObject, _hMemDC, A1_right 
+                invoke SelectObject, _hMemDC2, A1_right 
 
             .elseif arrow1.direction == D_DOWN_RIGHT
-                invoke SelectObject, _hMemDC, A1_down_right 
+                invoke SelectObject, _hMemDC2, A1_down_right 
 
             .elseif arrow1.direction == D_DOWN
-                invoke SelectObject, _hMemDC, A1_down 
+                invoke SelectObject, _hMemDC2, A1_down 
 
             .elseif arrow1.direction == D_DOWN_LEFT
-                invoke SelectObject, _hMemDC, A1_down_left 
+                invoke SelectObject, _hMemDC2, A1_down_left 
 
             .elseif arrow1.direction == D_LEFT ;left is the last possible direction
-                invoke SelectObject, _hMemDC, A1_left  
+                invoke SelectObject, _hMemDC2, A1_left  
             .endif  
         .endif
 
@@ -363,39 +362,39 @@ paintArrows proc _hdc:HDC, _hMemDC:HDC
         sub eax, ARROW_HALF_SIZE_P.x
         sub ebx, ARROW_HALF_SIZE_P.y
 
-        invoke TransparentBlt, _hdc, eax, ebx,\
-            ARROW_SIZE_POINT.x, ARROW_SIZE_POINT.y, _hMemDC,\
+        invoke TransparentBlt, _hMemDC, eax, ebx,\
+            ARROW_SIZE_POINT.x, ARROW_SIZE_POINT.y, _hMemDC2,\
             0, 0, ARROW_SIZE_POINT.x, ARROW_SIZE_POINT.y, 16777215
         ;invoke BitBlt, _hdc, eax, ebx, ARROW_SIZE_POINT.x, ARROW_SIZE_POINT.y, _hMemDC, 0, 0, SRCCOPY 
 
 
 ;________PLAYER 2 PAINTING_____________________________________________________________
         .if arrow2.onGround == 1 
-            invoke SelectObject, _hMemDC, A2_ground
+            invoke SelectObject, _hMemDC2, A2_ground
         .else
             .if arrow2.direction == D_TOP_LEFT
-                invoke SelectObject, _hMemDC, A2_top_left
+                invoke SelectObject, _hMemDC2, A2_top_left
             
             .elseif arrow2.direction == D_TOP
-                invoke SelectObject, _hMemDC, A2_top
+                invoke SelectObject, _hMemDC2, A2_top
 
             .elseif arrow2.direction == D_TOP_RIGHT
-                invoke SelectObject, _hMemDC, A2_top_right 
+                invoke SelectObject, _hMemDC2, A2_top_right 
 
             .elseif arrow2.direction == D_RIGHT
-                invoke SelectObject, _hMemDC, A2_right 
+                invoke SelectObject, _hMemDC2, A2_right 
 
             .elseif arrow2.direction == D_DOWN_RIGHT
-                invoke SelectObject, _hMemDC, A2_down_right 
+                invoke SelectObject, _hMemDC2, A2_down_right 
 
             .elseif arrow2.direction == D_DOWN
-                invoke SelectObject, _hMemDC, A2_down 
+                invoke SelectObject, _hMemDC2, A2_down 
 
             .elseif arrow2.direction == D_DOWN_LEFT
-                invoke SelectObject, _hMemDC, A2_down_left 
+                invoke SelectObject, _hMemDC2, A2_down_left 
 
             .elseif arrow2.direction == D_LEFT ;left is the last possible direction
-                invoke SelectObject, _hMemDC, A2_left  
+                invoke SelectObject, _hMemDC2, A2_left  
             .endif  
         .endif
 
@@ -404,8 +403,8 @@ paintArrows proc _hdc:HDC, _hMemDC:HDC
         sub eax, ARROW_HALF_SIZE_P.x
         sub ebx, ARROW_HALF_SIZE_P.y
 
-        invoke TransparentBlt, _hdc, eax, ebx,\
-            ARROW_SIZE_POINT.x, ARROW_SIZE_POINT.y, _hMemDC,\
+        invoke TransparentBlt, _hMemDC, eax, ebx,\
+            ARROW_SIZE_POINT.x, ARROW_SIZE_POINT.y, _hMemDC2,\
             0, 0, ARROW_SIZE_POINT.x, ARROW_SIZE_POINT.y, 16777215
         ;invoke BitBlt, _hdc, eax, ebx, ARROW_SIZE_POINT.x, ARROW_SIZE_POINT.y, _hMemDC, 0, 0, SRCCOPY 
     
@@ -415,13 +414,21 @@ paintArrows endp
 ;________________________________________________________________________________
 
 updateScreen proc
-    LOCAL hMemDC:HDC 
+    LOCAL hMemDC:HDC
+    LOCAL hMemDC2:HDC
+    LOCAL hBitmap:HDC
     LOCAL hDC:HDC
 
     invoke BeginPaint, hWnd, ADDR paintstruct
     mov hDC, eax
     invoke CreateCompatibleDC, hDC
     mov hMemDC, eax
+    invoke CreateCompatibleDC, hDC ; for double buffering
+    mov hMemDC2, eax
+    invoke CreateCompatibleBitmap, hDC, WINDOW_SIZE_X, WINDOW_SIZE_Y
+    mov hBitmap, eax
+
+    invoke SelectObject, hMemDC, hBitmap
 
     ;invoke wsprintf, ADDR buffer, ADDR test_header_format, h_V1_top_left
     ;invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL
@@ -434,13 +441,18 @@ updateScreen proc
 ;if gamestate == 0
 ;    invoke paintSplashScreen
 ;elseif gamestate == 1
-    invoke paintBackground, hDC, hMemDC
 
-    invoke paintPlayers, hDC, hMemDC
-    invoke paintArrows, hDC, hMemDC
-    invoke paintHearts, hDC, hMemDC
+    invoke paintBackground, hDC, hMemDC, hMemDC2
+
+    invoke paintPlayers, hDC, hMemDC, hMemDC2
+    invoke paintArrows, hDC, hMemDC, hMemDC2
+    invoke paintHearts, hDC, hMemDC, hMemDC2
+
+    invoke BitBlt, hDC, 0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y, hMemDC, 0, 0, SRCCOPY
 
     invoke DeleteDC, hMemDC
+    invoke DeleteDC, hMemDC2
+    invoke DeleteObject, hBitmap
     invoke EndPaint, hWnd, ADDR paintstruct
 ;endif
 
@@ -455,7 +467,7 @@ paintThread proc p:DWORD
 
         ;invoke updateScreen
 
-        invoke InvalidateRect, hWnd, NULL, TRUE
+        invoke InvalidateRect, hWnd, NULL, FALSE
 
     .endw
 

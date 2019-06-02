@@ -99,6 +99,10 @@ arrow ends
     DASH_SPEED    EQU 16
 
 .DATA
+    big_buffer  db 65536 dup(?)
+                db 65536 dup(?)
+                db 65536 dup(?)
+
     paintstruct        PAINTSTRUCT <>
 
     PLAYER_SIZE_POINT  point <46,46>
