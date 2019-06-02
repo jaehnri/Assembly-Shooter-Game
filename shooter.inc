@@ -141,6 +141,11 @@ arrow ends
     A2_left           dd 0
     A2_ground         dd 0
 
+    ;Player1 won
+    p1_won            dd 0
+    ;Player2 won
+    p2_won            dd 0
+
     ;Heart Bitmaps:
     HT_heart1         dd 0
     HT_heart2         dd 0

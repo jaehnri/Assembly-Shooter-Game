@@ -108,6 +108,12 @@ loadImages proc
     invoke LoadBitmap, hInstance, 134
     mov p1_spritesheet, eax
 
+    ;Loading winner's Bitmaps:
+    invoke LoadBitmap, hInstance, 300
+    mov p1_won, eax
+    invoke LoadBitmap, hInstance, 301
+    mov p2_won, eax
+
     ;Loading Heart Bitmaps:
     invoke LoadBitmap, hInstance, 200
     mov HT_heart1, eax
@@ -192,6 +198,16 @@ paintBackground proc _hdc:HDC, _hMemDC:HDC, _hMemDC2:HDC
 
 .if GAMESTATE == 2
     invoke SelectObject, _hMemDC2, h_background
+    invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
+.endif
+
+.if GAMESTATE == 3 ; player 1 won
+    invoke SelectObject, _hMemDC2, p1_won
+    invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
+.endif
+
+.if GAMESTATE == 4 ; player 2 won
+    invoke SelectObject, _hMemDC2, p2_won
     invoke BitBlt, _hMemDC, 0, 0, 1200, 800, _hMemDC2, 0, 0, SRCCOPY
 .endif
 
@@ -444,9 +460,11 @@ updateScreen proc
 
     invoke paintBackground, hDC, hMemDC, hMemDC2
 
-    invoke paintPlayers, hDC, hMemDC, hMemDC2
-    invoke paintArrows, hDC, hMemDC, hMemDC2
-    invoke paintHearts, hDC, hMemDC, hMemDC2
+    .if GAMESTATE == 2
+        invoke paintPlayers, hDC, hMemDC, hMemDC2
+        invoke paintArrows, hDC, hMemDC, hMemDC2
+        invoke paintHearts, hDC, hMemDC, hMemDC2
+    .endif
 
     invoke BitBlt, hDC, 0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y, hMemDC, 0, 0, SRCCOPY
 
@@ -695,6 +713,53 @@ fixArrowCoordinates endp
 
 ;______________________________________________________________________________
 
+gameOver proc
+    mov player1.playerObj.pos.x, 100
+    mov player1.playerObj.pos.y, 350
+    mov player2.playerObj.pos.x, 1120
+    mov player2.playerObj.pos.y, 350
+    
+    mov player1.playerObj.speed.x, 0
+    mov player1.playerObj.speed.y, 0
+    mov player2.playerObj.speed.x, 0
+    mov player2.playerObj.speed.y, 0
+
+    mov player1.stopped, 1
+    mov player2.stopped, 1
+
+    mov player1.life, 4
+    mov player2.life, 4
+
+    mov player1.direction, D_RIGHT
+    mov player2.direction, D_LEFT
+
+    mov player1.walkanimationCD, 0
+    mov player2.walkanimationCD, 0
+
+    mov player1.walksequence, 0
+    mov player2.walksequence, 0
+
+    mov player1.dashanimationCD, 0
+    mov player2.dashanimationCD, 0
+
+    mov player1.dashsequence, 0
+    mov player2.dashsequence, 0
+
+    mov arrow1.onGround, 1
+    mov arrow1.arrowObj.pos.x, -100
+    mov arrow1.arrowObj.pos.y, -100
+    mov arrow1.playerOwns, 1
+
+
+    mov arrow2.onGround, 1
+    mov arrow2.arrowObj.pos.x, -100
+    mov arrow2.arrowObj.pos.y, -100
+    mov arrow2.playerOwns, 1
+
+    ret
+gameOver endp
+
+;______________________________________________________________________________
 
 gameManager proc p:dword
         LOCAL area:RECT
@@ -708,6 +773,7 @@ gameManager proc p:dword
             invoke Sleep, 30
         .endw
 
+        game:
         .while GAMESTATE == 2
             invoke Sleep, 30
 
@@ -721,6 +787,10 @@ gameManager proc p:dword
                 mov player2.playerObj.pos.x, 50
                 mov player2.playerObj.pos.y, 50
                 dec player2.life
+                .if player2.life == 0
+                    invoke gameOver
+                    mov GAMESTATE, 3 ; player 1 won
+                .endif
             .endif
 
             invoke isColliding, player1.playerObj.pos, arrow1.arrowObj.pos, PLAYER_SIZE_POINT, ARROW_SIZE_POINT
@@ -738,8 +808,10 @@ gameManager proc p:dword
                 mov player1.playerObj.pos.x, 50
                 mov player1.playerObj.pos.y, 50
                 dec player1.life
-                ;invoke wsprintf, ADDR buffer, ADDR test_header_format, player1.life
-                ;invoke MessageBox, NULL, ADDR buffer, ADDR msgBoxTitle, MB_OKCANCEL 
+                .if player1.life == 0
+                    invoke gameOver
+                    mov GAMESTATE, 4 ; player 2 won
+                .endif
             .endif
 
             invoke isColliding, player2.playerObj.pos, arrow2.arrowObj.pos, PLAYER_SIZE_POINT, ARROW_SIZE_POINT
@@ -885,8 +957,13 @@ gameManager proc p:dword
             invoke fixCoordinates, addr player2
 
             ;invoke InvalidateRect, hWnd, NULL, TRUE
-            
         .endw
+
+        .while GAMESTATE == 3 || GAMESTATE == 4
+            invoke Sleep, 30
+        .endw
+
+        jmp game
 ret
 gameManager endp
 
@@ -1045,8 +1122,8 @@ WndProc proc _hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
         ;invoke CreateThread, NULL, NULL, eax, 0, 0, addr threadID 
         ;invoke CloseHandle, eax
         .if (wParam == 13) ; [ENTER]
-            .if GAMESTATE == 1
-                inc GAMESTATE
+            .if GAMESTATE == 1 || GAMESTATE == 3 || GAMESTATE == 4
+                mov GAMESTATE, 2
             .endif
         .endif
 
