@@ -784,8 +784,8 @@ gameManager proc p:dword
             ;.endif
             invoke isColliding, player2.playerObj.pos, arrow1.arrowObj.pos, PLAYER_SIZE_POINT, ARROW_SIZE_POINT
             .if edx == TRUE
-                mov player2.playerObj.pos.x, 50
-                mov player2.playerObj.pos.y, 50
+                mov player2.playerObj.pos.x, 1120
+                mov player2.playerObj.pos.y, 350
                 dec player2.life
                 .if player2.life == 0
                     invoke gameOver
@@ -805,8 +805,8 @@ gameManager proc p:dword
 
             invoke isColliding, player1.playerObj.pos, arrow2.arrowObj.pos, PLAYER_SIZE_POINT, ARROW_SIZE_POINT
             .if edx == TRUE
-                mov player1.playerObj.pos.x, 50
-                mov player1.playerObj.pos.y, 50
+                mov player1.playerObj.pos.x, 100
+                mov player1.playerObj.pos.y, 350
                 dec player1.life
                 .if player1.life == 0
                     invoke gameOver
