@@ -1,2 +1,0 @@
-bldall combat
-exit
